@@ -1,9 +1,9 @@
-<h1>User: <%= @user.email %></h1>
+<h1>Utilizador: <%= @user.email %></h1>
 
 <p>
-  <strong>Role:</strong>
-  <%= @user.role %>
+  <strong>Função:</strong>
+  <%= role_name(@user.role) %>
 </p>
 
-<%= link_to "Edit", edit_user_path(@user) %> |
-<%= link_to "Back", users_path %>
+<%= link_to "Editar", edit_user_path(@user), class: "btn btn-primary" %>
+<%= link_to "Voltar", users_path, class: "btn" %>

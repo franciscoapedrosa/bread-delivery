@@ -52,49 +52,49 @@ end
   def create
     @delivery = Delivery.new(delivery_params)
     if @delivery.save
-      redirect_to @delivery, notice: "Delivery was successfully created."
+      redirect_to @delivery, notice: "Entrega criada com sucesso."
     else
       flash.now[:alert] = @delivery.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
       @delivery ||= Delivery.new(delivery_params)
-      @delivery.errors.add(:base, "A delivery for this route, customer, distributor and day already exists.")
+      @delivery.errors.add(:base, "Já existe uma entrega para esta rota, cliente, distribuidor e dia.")
       flash.now[:alert] = @delivery.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
   end
 
   def update
     if @delivery.update(delivery_params)
-      redirect_to @delivery, notice: "Delivery was successfully updated."
+      redirect_to @delivery, notice: "Entrega atualizada com sucesso."
     else
       flash.now[:alert] = @delivery.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
       @delivery ||= Delivery.new(delivery_params)
-      @delivery.errors.add(:base, "A delivery for this route, customer, distributor and day already exists.")
+      @delivery.errors.add(:base, "Já existe uma entrega para esta rota, cliente, distribuidor e dia.")
       flash.now[:alert] = @delivery.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity
   end
 
   def destroy
     @delivery.destroy
-    redirect_to deliveries_url, notice: "Delivery was successfully deleted."
+    redirect_to deliveries_url, notice: "Entrega eliminada com sucesso."
   end
 
   def reset_week
     scope = current_user.admin? ? Delivery.all : Delivery.where(distributor_id: current_user.id)
     scope = scope.where(day_of_week: params[:day]) if params[:day].present?
     updated = scope.update_all(status: "pending", updated_at: Time.current)
-    redirect_to deliveries_path, notice: "Week reset: #{updated} deliveries reset to pending."
+    redirect_to deliveries_path, notice: "Semana reposta: #{updated} entregas ficaram pendentes."
   end
 
   def destroy_week
     scope = Delivery.all
     scope = scope.where(day_of_week: params[:day]) if params[:day].present?
     deleted = scope.delete_all
-    redirect_to deliveries_path, notice: "Week deleted: #{deleted} deliveries deleted."
+    redirect_to deliveries_path, notice: "Semana eliminada: #{deleted} entregas removidas."
   end
 
 
@@ -117,6 +117,6 @@ end
 
     return if %w[show edit update].include?(action_name) && @delivery.distributor_id == current_user.id
 
-    redirect_to deliveries_path, alert: "Not allowed."
+    redirect_to deliveries_path, alert: "Operação não permitida."
   end
 end

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-PT">
   <head>
-    <title><%= content_for(:title) || "Bread Delivery" %></title>
+    <title><%= content_for(:title) || "Gestão de Entregas de Pão" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -25,8 +25,8 @@
   <body>
     <main class="site-shell">
       <% if user_signed_in? %>
-        <nav class="top-nav" aria-label="Main navigation">
-          <%= link_to "Back to Home", authenticated_root_path, class: "btn-back" %>
+        <nav class="top-nav" aria-label="Navegação principal">
+          <%= link_to "Voltar ao início", authenticated_root_path, class: "btn-back" %>
         </nav>
       <% end %>
 

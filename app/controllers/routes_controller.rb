@@ -29,7 +29,7 @@ class RoutesController < ApplicationController
   def create
     @route = Route.new(route_params)
     if @route.save
-      redirect_to @route, notice: "Route was successfully created."
+      redirect_to @route, notice: "Rota criada com sucesso."
     else
       render :new, status: :unprocessable_entity
     end
@@ -37,7 +37,7 @@ class RoutesController < ApplicationController
 
   def update
     if @route.update(route_params)
-      redirect_to @route, notice: "Route was successfully updated."
+      redirect_to @route, notice: "Rota atualizada com sucesso."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -45,7 +45,7 @@ class RoutesController < ApplicationController
 
   def destroy
     if @route.destroy
-      redirect_to routes_url, notice: "Route was successfully deleted."
+      redirect_to routes_url, notice: "Rota eliminada com sucesso."
     else
       redirect_to routes_url, alert: @route.errors.full_messages.to_sentence
     end

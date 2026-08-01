@@ -1,16 +1,16 @@
-<h1>Customers</h1>
+<h1>Clientes</h1>
 
-<%= link_to "New Customer", new_customer_path, class: "btn btn-primary" %>
+<%= link_to "Novo cliente", new_customer_path, class: "btn btn-primary" %>
 
-<h2>Active Customers</h2>
+<h2>Clientes ativos</h2>
 <table>
   <thead>
     <tr>
-      <th>Name</th>
-      <th>Address</th>
-      <th>Bread Quantity</th>
-      <th>Status</th>
-      <th>Actions</th>
+      <th>Nome</th>
+      <th>Morada</th>
+      <th>Quantidade de pão</th>
+      <th>Estado</th>
+      <th>Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -19,25 +19,27 @@
         <td><%= link_to customer.name, customer_path(customer) %></td>
         <td><%= customer.address %></td>
         <td><%= customer.bread_quantity %></td>
-        <td>Active</td>
+        <td>Ativo</td>
         <td>
-          <%= link_to "Edit", edit_customer_path(customer) %> |
-          <%= button_to "Deactivate", deactivate_customer_path(customer), method: :patch, data: { turbo_method: :patch, confirm: "Are you sure you want to deactivate this customer?" } %>
+          <div class="table-actions">
+            <%= link_to "Editar", edit_customer_path(customer), class: "btn btn-small" %>
+            <%= button_to "Desativar", deactivate_customer_path(customer), method: :patch, class: "btn btn-small btn-danger", form_class: "inline-form", data: { turbo_confirm: "Tem a certeza de que pretende desativar este cliente?" } %>
+          </div>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<h2>Inactive Customers</h2>
+<h2>Clientes inativos</h2>
 <table>
   <thead>
     <tr>
-      <th>Name</th>
-      <th>Address</th>
-      <th>Bread Quantity</th>
-      <th>Status</th>
-      <th>Actions</th>
+      <th>Nome</th>
+      <th>Morada</th>
+      <th>Quantidade de pão</th>
+      <th>Estado</th>
+      <th>Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -46,9 +48,9 @@
         <td><%= link_to customer.name, customer_path(customer) %></td>
         <td><%= customer.address %></td>
         <td><%= customer.bread_quantity %></td>
-        <td>Inactive</td>
+        <td>Inativo</td>
         <td>
-        <%= button_to "Reactivate", activate_customer_path(customer), method: :patch, data: { confirm: "Are you sure you want to reactivate this customer?" } %>
+        <%= button_to "Reativar", activate_customer_path(customer), method: :patch, class: "btn btn-small", data: { turbo_confirm: "Tem a certeza de que pretende reativar este cliente?" } %>
         </td>
       </tr>
     <% end %>

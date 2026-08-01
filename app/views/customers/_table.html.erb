@@ -1,18 +1,18 @@
 <% if customers.blank? %>
-  <p>No customers assigned this week.</p>
+  <p>Não existem clientes atribuídos esta semana.</p>
 <% else %>
   <table>
     <thead>
       <tr>
-        <th>Customer</th>
-        <th>Address</th>
-        <th>Bread Qty</th>
-        <th>Days</th>
+        <th>Cliente</th>
+        <th>Morada</th>
+        <th>Quantidade de pão</th>
+        <th>Dias</th>
       </tr>
     </thead>
     <tbody>
       <% customers.each do |customer| %>
-        <% days = (days_by_customer[customer.id] || []).map(&:capitalize).join(", ") %>
+        <% days = (days_by_customer[customer.id] || []).map { |day| day_name(day) }.join(", ") %>
         <tr>
           <td><%= customer.name %></td>
           <td><%= customer.address %></td>

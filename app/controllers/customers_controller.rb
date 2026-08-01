@@ -4,7 +4,7 @@ class CustomersController < ApplicationController
 
   def my_customers
     unless current_user.distributor?
-      redirect_to authenticated_root_path, alert: "Access denied."
+      redirect_to authenticated_root_path, alert: "Acesso negado."
       return
     end
 
@@ -33,7 +33,7 @@ class CustomersController < ApplicationController
   def create
     @customer = Customer.new(customer_params)
     if @customer.save
-      redirect_to @customer, notice: "Customer was successfully created."
+      redirect_to @customer, notice: "Cliente criado com sucesso."
     else
       render :new, status: :unprocessable_entity
     end
@@ -41,7 +41,7 @@ class CustomersController < ApplicationController
 
   def update
     if @customer.update(customer_params)
-      redirect_to @customer, notice: "Customer was successfully updated."
+      redirect_to @customer, notice: "Cliente atualizado com sucesso."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -49,7 +49,7 @@ class CustomersController < ApplicationController
 
   def destroy
     if @customer.destroy
-      redirect_to customers_path, notice: "Customer permanently deleted."
+      redirect_to customers_path, notice: "Cliente eliminado permanentemente."
     else
       redirect_to customers_path, alert: @customer.errors.full_messages.to_sentence
     end
@@ -57,17 +57,17 @@ class CustomersController < ApplicationController
 
   def deactivate
     if @customer.update(active: false)
-      redirect_to customers_path, notice: "Customer was successfully deactivated."
+      redirect_to customers_path, notice: "Cliente desativado com sucesso."
     else
-      redirect_to customers_path, alert: "Failed to deactivate customer."
+      redirect_to customers_path, alert: "Não foi possível desativar o cliente."
     end
   end
 
   def activate
     if @customer.update(active: true)
-      redirect_to customers_path, notice: "Customer was successfully reactivated."
+      redirect_to customers_path, notice: "Cliente reativado com sucesso."
     else
-      redirect_to customers_path, alert: "Failed to reactivate customer."
+      redirect_to customers_path, alert: "Não foi possível reativar o cliente."
     end
   end
 

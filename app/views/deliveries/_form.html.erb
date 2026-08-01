@@ -1,14 +1,14 @@
-<%= render "shared/error_messages", object: @delivery, title: "Couldn't save delivery:" %>
+<%= render "shared/error_messages", object: @delivery, title: "Não foi possível guardar a entrega:" %>
 
 <%= form_with(model: @delivery, local: true) do |form| %>
   <% if current_user.admin? %>
     <div>
-      <%= form.label :route_id, "Route" %><br>
+      <%= form.label :route_id, "Rota" %><br>
       <%= form.collection_select :route_id, Route.all, :id, :name %>
     </div>
 
     <div>
-      <%= form.label :customer_id, "Customer" %><br>
+      <%= form.label :customer_id, "Cliente" %><br>
       <%= form.collection_select :customer_id, Customer.active, :id, :name %>
     </div>
 
@@ -18,15 +18,15 @@
     </div>
 
     <div>
-      <%= form.label :day_of_week, "Day of Week" %><br>
-      <%= form.select :day_of_week, %w[monday tuesday wednesday thursday friday saturday sunday].map { |d| [d.capitalize, d] } %>
+      <%= form.label :day_of_week, "Dia da semana" %><br>
+      <%= form.select :day_of_week, ApplicationHelper::DAYS_PT.map { |day, label| [label, day] } %>
     </div>
   <% end %>
 
   <div>
-    <%= form.label :status %><br>
-    <%= form.select :status, ["pending", "delivered", "cancelled"] %>
+    <%= form.label :status, "Estado" %><br>
+    <%= form.select :status, ApplicationHelper::STATUS_PT.map { |status, label| [label, status] } %>
   </div>
 
-  <p><%= form.submit %></p>
+  <p><%= form.submit "Guardar", class: "btn btn-primary" %></p>
 <% end %>

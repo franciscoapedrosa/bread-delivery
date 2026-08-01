@@ -19,7 +19,7 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      redirect_to @user, notice: "User was successfully created."
+      redirect_to @user, notice: "Utilizador criado com sucesso."
     else
       render :new, status: :unprocessable_entity
     end
@@ -28,13 +28,13 @@ class UsersController < ApplicationController
   def update
     if params[:user][:password].blank?
       if @user.update(user_params.except(:password, :password_confirmation))
-        redirect_to @user, notice: "User was successfully updated."
+        redirect_to @user, notice: "Utilizador atualizado com sucesso."
       else
         render :edit, status: :unprocessable_entity
       end
     else
       if @user.update(user_params)
-        redirect_to @user, notice: "User was successfully updated."
+        redirect_to @user, notice: "Utilizador atualizado com sucesso."
       else
         render :edit, status: :unprocessable_entity
       end
@@ -43,9 +43,9 @@ class UsersController < ApplicationController
 
   def destroy
     if @user == current_user
-      redirect_to users_path, alert: "You cannot delete your own account."
+      redirect_to users_path, alert: "Não pode eliminar a sua própria conta."
     elsif @user.destroy
-      redirect_to users_path, notice: "User was successfully deleted."
+      redirect_to users_path, notice: "Utilizador eliminado com sucesso."
     else
       redirect_to users_path, alert: @user.errors.full_messages.to_sentence
     end

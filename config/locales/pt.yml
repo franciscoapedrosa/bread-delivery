@@ -1,0 +1,54 @@
+pt:
+  activerecord:
+    errors:
+      messages:
+        blank: "não pode ficar em branco"
+        taken: "já está em uso"
+        invalid: "não é válido"
+        inclusion: "não está incluído na lista"
+        greater_than: "tem de ser superior a %{count}"
+    attributes:
+      customer:
+        name: "Nome"
+        address: "Morada"
+        bread_quantity: "Quantidade de pão"
+      route:
+        name: "Nome"
+      user:
+        password: "Palavra-passe"
+        role: "Função"
+      delivery:
+        route: "Rota"
+        customer: "Cliente"
+        distributor: "Distribuidor"
+        day_of_week: "Dia da semana"
+        status: "Estado"
+  devise:
+    failure:
+      already_authenticated: "Já tem uma sessão iniciada."
+      inactive: "A sua conta ainda não está ativa."
+      invalid: "Email ou palavra-passe inválidos."
+      last_attempt: "Tem mais uma tentativa antes de a conta ser bloqueada."
+      locked: "A sua conta está bloqueada."
+      not_found_in_database: "Email ou palavra-passe inválidos."
+      timeout: "A sua sessão expirou. Inicie sessão novamente."
+      unauthenticated: "Tem de iniciar sessão para continuar."
+    sessions:
+      signed_in: "Sessão iniciada com sucesso."
+      signed_out: "Sessão terminada com sucesso."
+      already_signed_out: "Sessão terminada com sucesso."
+    passwords:
+      no_token: "Não pode aceder a esta página sem usar uma ligação de recuperação."
+      send_instructions: "Receberá em breve um email com instruções para alterar a palavra-passe."
+      updated: "A palavra-passe foi alterada com sucesso."
+      updated_not_active: "A palavra-passe foi alterada com sucesso."
+  errors:
+    messages:
+      already_confirmed: "já foi confirmado"
+      confirmation_period_expired: "tem de ser confirmado novamente"
+      expired: "expirou; peça um novo"
+      not_found: "não encontrado"
+      not_locked: "não estava bloqueado"
+      not_saved:
+        one: "1 erro impediu que este registo fosse guardado:"
+        other: "%{count} erros impediram que este registo fosse guardado:"

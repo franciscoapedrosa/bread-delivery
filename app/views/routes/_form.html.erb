@@ -1,10 +1,10 @@
-<%= render "shared/error_messages", object: @route, title: "Couldn't save route:" %>
+<%= render "shared/error_messages", object: @route, title: "Não foi possível guardar a rota:" %>
 
 <%= form_with(model: @route, local: true) do |form| %>
   <p>
-    <%= form.label :name %><br>
+    <%= form.label :name, "Nome" %><br>
     <%= form.text_field :name %>
   </p>
 
-  <p><%= form.submit %></p>
+  <p><%= form.submit "Guardar", class: "btn btn-primary" %></p>
 <% end %>

@@ -1,12 +1,12 @@
-<h1>Routes</h1>
+<h1>Rotas</h1>
 
 <% if current_user.admin? %>
-  <%= link_to "New Route", new_route_path, class: "btn btn-primary" %>
+  <%= link_to "Nova rota", new_route_path, class: "btn btn-primary" %>
   <table>
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Actions</th>
+        <th>Nome</th>
+        <th>Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -14,20 +14,22 @@
         <tr>
           <td><%= route.name %></td>
           <td>
-            <%= link_to "Edit", edit_route_path(route) %> |
-            <%= button_to "Delete", route_path(route), method: :delete, data: { confirm: "Are you sure?" } %>
+            <div class="table-actions">
+              <%= link_to "Editar", edit_route_path(route), class: "btn btn-small" %>
+              <%= button_to "Eliminar", route_path(route), method: :delete, class: "btn btn-small btn-danger", form_class: "inline-form", data: { turbo_confirm: "Tem a certeza?" } %>
+            </div>
           </td>
         </tr>
       <% end %>
     </tbody>
   </table>
 <% else %>
-  <h2>My Routes This Week</h2>
+  <h2>As minhas rotas desta semana</h2>
 
   <% order = %w[monday tuesday wednesday thursday friday saturday sunday] %>
 
   <% order.each do |day| %>
-    <h3><%= day.capitalize %></h3>
+    <h3><%= day_name(day) %></h3>
     <% if @routes_by_day[day].present? %>
       <ul>
         <% @routes_by_day[day].each do |route| %>
@@ -35,7 +37,7 @@
         <% end %>
       </ul>
     <% else %>
-      <p>No routes assigned</p>
+      <p>Não existem rotas atribuídas.</p>
     <% end %>
   <% end %>
 <% end %>

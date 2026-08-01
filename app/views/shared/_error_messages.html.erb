@@ -1,6 +1,6 @@
 <% if object && object.errors.any? %>
   <div id="error_explanation">
-    <h2><%= local_assigns[:title] || "There were some problems:" %></h2>
+    <h2><%= local_assigns[:title] || "Foram encontrados alguns problemas:" %></h2>
     <ul>
       <% object.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>

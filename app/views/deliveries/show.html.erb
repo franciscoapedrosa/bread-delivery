@@ -1,18 +1,18 @@
-<h1>Delivery</h1>
+<h1>Entrega</h1>
 
 <p>
-  <strong>Route:</strong>
+  <strong>Rota:</strong>
   <%= @delivery.route.name %>
 </p>
 
 <p>
-  <strong>Day of Week:</strong>
-  <%= @delivery.day_of_week.capitalize %>
+  <strong>Dia da semana:</strong>
+  <%= day_name(@delivery.day_of_week) %>
 </p>
 
 
 <p>
-  <strong>Customer:</strong>
+  <strong>Cliente:</strong>
   <%= @delivery.customer.name %>
 </p>
 
@@ -22,9 +22,9 @@
 </p>
 
 <p>
-  <strong>Status:</strong>
-  <%= @delivery.status %>
+  <strong>Estado:</strong>
+  <%= delivery_status(@delivery.status) %>
 </p>
 
-<%= link_to "Edit", edit_delivery_path(@delivery) %> |
-<%= link_to "Back", deliveries_path %>
+<%= link_to "Editar", edit_delivery_path(@delivery), class: "btn btn-primary" %>
+<%= link_to "Voltar", deliveries_path, class: "btn" %>

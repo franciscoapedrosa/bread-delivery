@@ -1,65 +1,65 @@
 <div class="container">
-  <h1 class="page-title">Bread Delivery</h1>
-  <p class="subtitle">Welcome, <strong><%= current_user.email %></strong></p>
+  <h1 class="page-title">Gestão de Entregas de Pão</h1>
+  <p class="subtitle">Bem-vindo, <strong><%= current_user.email %></strong></p>
 
   <% if current_user.admin? %>
     <section>
-      <h2 class="section-title">Admin area</h2>
+      <h2 class="section-title">Área de administração</h2>
 
       <div class="card-grid">
         <div class="card">
           <div class="card-icon">👤</div>
-          <h3 class="card-title">Human Resources</h3>
-          <p class="card-text">Create, edit and remove users.</p>
-          <%= link_to "Open", users_path, class: "btn btn-primary" %>
+          <h3 class="card-title">Recursos Humanos</h3>
+          <p class="card-text">Crie, edite e remova utilizadores.</p>
+          <%= link_to "Abrir", users_path, class: "btn btn-primary" %>
         </div>
 
         <div class="card">
           <div class="card-icon">🧍‍♀️</div>
-          <h3 class="card-title">Customers</h3>
-          <p class="card-text">Active and inactive customers.</p>
-          <%= link_to "Open", customers_path, class: "btn" %>
+          <h3 class="card-title">Clientes</h3>
+          <p class="card-text">Consulte os clientes ativos e inativos.</p>
+          <%= link_to "Abrir", customers_path, class: "btn" %>
         </div>
 
         <div class="card">
           <div class="card-icon">🗺️</div>
-          <h3 class="card-title">Routes</h3>
-          <p class="card-text">Weekly routes configuration.</p>
-          <%= link_to "Open", routes_path, class: "btn" %>
+          <h3 class="card-title">Rotas</h3>
+          <p class="card-text">Configure as rotas semanais.</p>
+          <%= link_to "Abrir", routes_path, class: "btn" %>
         </div>
 
         <div class="card">
           <div class="card-icon">📦</div>
-          <h3 class="card-title">Deliveries</h3>
-          <p class="card-text">Track all deliveries and status.</p>
-          <%= link_to "Open", deliveries_path, class: "btn" %>
+          <h3 class="card-title">Entregas</h3>
+          <p class="card-text">Acompanhe todas as entregas e os seus estados.</p>
+          <%= link_to "Abrir", deliveries_path, class: "btn" %>
         </div>
       </div>
     </section>
   <% else %>
     <section>
-      <h2 class="section-title">Distributor area</h2>
+      <h2 class="section-title">Área do distribuidor</h2>
 
       <div class="card-grid">
         <div class="card">
           <div class="card-icon">📦</div>
-          <h3 class="card-title">My Deliveries</h3>
-          <p class="card-text">View and update your delivery status.</p>
-          <%= link_to "Open", deliveries_path, class: "btn btn-primary" %>
+          <h3 class="card-title">As minhas entregas</h3>
+          <p class="card-text">Consulte e atualize o estado das suas entregas.</p>
+          <%= link_to "Abrir", deliveries_path, class: "btn btn-primary" %>
         </div>
 
         <div class="card">
           <div class="card-icon">🗺️</div>
-          <h3 class="card-title">My Routes</h3>
-          <p class="card-text">Check your weekly assigned routes.</p>
-          <%= link_to "Open", routes_path, class: "btn" %>
+          <h3 class="card-title">As minhas rotas</h3>
+          <p class="card-text">Consulte as rotas que lhe foram atribuídas esta semana.</p>
+          <%= link_to "Abrir", routes_path, class: "btn" %>
         </div>
 
         <div class="card">
           <div class="card-icon">🧍‍♀️</div>
-          <h3 class="card-title">My Customers</h3>
-          <p class="card-text">See addresses and bread quantity for this week.</p>
-          <%= link_to "Open", my_customers_path, class: "btn" %>        
+          <h3 class="card-title">Os meus clientes</h3>
+          <p class="card-text">Consulte as moradas e quantidades de pão desta semana.</p>
+          <%= link_to "Abrir", my_customers_path, class: "btn" %>
         </div>
       </div>
   </section>
@@ -68,5 +68,5 @@
 
 
 <div class="logout">
-  <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-ghost" %>
+  <%= button_to "Terminar sessão", destroy_user_session_path, method: :delete, class: "btn btn-ghost" %>
 </div>

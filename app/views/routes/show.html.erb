@@ -1,9 +1,9 @@
-<h1>Route: <%= @route.name %></h1>
+<h1>Rota: <%= @route.name %></h1>
 
 <p>
-  <strong>Name:</strong>
+  <strong>Nome:</strong>
   <%= @route.name %>
 </p>
 
-<%= link_to "Edit", edit_route_path(@route) %> |
-<%= link_to "Back", routes_path %>
+<%= link_to "Editar", edit_route_path(@route), class: "btn btn-primary" %>
+<%= link_to "Voltar", routes_path, class: "btn" %>

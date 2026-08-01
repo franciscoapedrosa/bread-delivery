@@ -1,7 +1,7 @@
 <%= form_with(model: @user, local: true) do |form| %>
   <% if @user.errors.any? %>
     <div class="error-messages">
-      <h2><%= pluralize(@user.errors.count, "error") %> prevented this user from being saved:</h2>
+      <h2>Não foi possível guardar o utilizador:</h2>
       <ul>
         <% @user.errors.full_messages.each do |msg| %>
           <li><%= msg %></li>
@@ -17,17 +17,17 @@
 
   <% if action_name == "new" %>
     <div class="field">
-      <%= form.label :password %><br>
+      <%= form.label :password, "Palavra-passe" %><br>
       <%= form.password_field :password %>
     </div>
   <% end %>
 
   <div class="field">
-    <%= form.label :role %><br>
-    <%= form.select :role, [["Admin", "admin"], ["Distributor", "distributor"]] %>
+    <%= form.label :role, "Função" %><br>
+    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"]] %>
   </div>
 
   <div class="actions">
-    <%= form.submit %>
+    <%= form.submit "Guardar", class: "btn btn-primary" %>
   </div>
 <% end %>

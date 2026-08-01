@@ -1,52 +1,52 @@
-<h1>Deliveries</h1>
+<h1>Entregas</h1>
 
 <div class="action-bar">
-  <%= form_with url: reset_week_deliveries_path, method: :post, local: true do |f| %>
+  <%= form_with url: reset_week_deliveries_path, method: :post, local: true, class: "week-action-form" do |f| %>
+    <%= f.label :day, "Período a repor", class: "sr-only", for: "reset-day" %>
     <%= f.select :day,
-          [["All week",""], ["Monday","monday"], ["Tuesday","tuesday"], ["Wednesday","wednesday"],
-           ["Thursday","thursday"], ["Friday","friday"], ["Saturday","saturday"], ["Sunday","sunday"]],
-          {}, class: "btn" %>
-    <%= f.submit "Reset", class: "btn btn-primary",
-          data: { turbo_confirm: "Set selected deliveries to pending?" } %>
+          [["Toda a semana", ""]] + ApplicationHelper::DAYS_PT.map { |value, label| [label, value] },
+          {}, class: "week-select", id: "reset-day" %>
+    <%= f.submit "Repor estados", class: "btn btn-primary",
+          data: { turbo_confirm: "Colocar as entregas selecionadas como pendentes?" } %>
   <% end %>
 
   <% if current_user.role == "admin" %>
-    <%= form_with url: destroy_week_deliveries_path, method: :delete, local: true do |f| %>
+    <%= form_with url: destroy_week_deliveries_path, method: :delete, local: true, class: "week-action-form" do |f| %>
+      <%= f.label :day, "Período a eliminar", class: "sr-only", for: "delete-day" %>
       <%= f.select :day,
-            [["All week",""], ["Monday","monday"], ["Tuesday","tuesday"], ["Wednesday","wednesday"],
-             ["Thursday","thursday"], ["Friday","friday"], ["Saturday","saturday"], ["Sunday","sunday"]],
-            {}, class: "btn" %>
-      <%= f.submit "Delete", class: "btn",
-            data: { turbo_confirm: "Delete selected deliveries? This cannot be undone." } %>
+            [["Toda a semana", ""]] + ApplicationHelper::DAYS_PT.map { |value, label| [label, value] },
+            {}, class: "week-select", id: "delete-day" %>
+      <%= f.submit "Eliminar entregas", class: "btn btn-danger",
+            data: { turbo_confirm: "Eliminar as entregas selecionadas? Esta ação não pode ser anulada." } %>
     <% end %>
   <% end %>
 </div>
 
 
 <% if current_user.admin? %>
-  <%= link_to "New Delivery", new_delivery_path, class: "btn btn-primary" %>
+  <%= link_to "Nova entrega", new_delivery_path, class: "btn btn-primary" %>
 
   <div class="card" style="margin-top:1rem;">
-    <h2 class="card-title">Weekly summary</h2>
+    <h2 class="card-title">Resumo semanal</h2>
     <p class="card-text" style="margin:.25rem 0 1rem;">
-      Total breads this week: <strong><%= @weekly_total_admin %></strong>
+      Total de pães esta semana: <strong><%= @weekly_total_admin %></strong>
     </p>
 
     <div class="card-grid">
       <div class="card">
-        <h3 class="card-title">Total by day</h3>
+        <h3 class="card-title">Total por dia</h3>
         <table>
           <thead>
             <tr>
-              <th>Day</th>
-              <th>Total Bread Qty</th>
+              <th>Dia</th>
+              <th>Total de pães</th>
             </tr>
           </thead>
           <tbody>
             <% @day_totals_admin.each do |day, total| %>
               <% next if total.zero? %>
               <tr>
-                <td><%= day.capitalize %></td>
+                <td><%= day_name(day) %></td>
                 <td><%= total %></td>
               </tr>
             <% end %>
@@ -55,12 +55,12 @@
       </div>
 
       <div class="card">
-        <h3 class="card-title">Total by distributor</h3>
+        <h3 class="card-title">Total por distribuidor</h3>
         <table>
           <thead>
             <tr>
-              <th>Distributor</th>
-              <th>Total Bread Qty</th>
+              <th>Distribuidor</th>
+              <th>Total de pães</th>
             </tr>
           </thead>
           <tbody>
@@ -78,21 +78,21 @@
 <% end %>
 
 <% if @deliveries_by_day.blank? %>
-  <p>No deliveries this week.</p>
+  <p>Não existem entregas esta semana.</p>
 <% else %>
   <% @deliveries_by_day.each do |day, deliveries| %>
-    <h2><%= day.capitalize %></h2>
+    <h2><%= day_name(day) %></h2>
     <table>
       <thead>
         <tr>
-          <th>Route</th>
-          <th>Customer</th>
+          <th>Rota</th>
+          <th>Cliente</th>
           <% if current_user.role == "distributor" %>
-            <th>Bread Qty</th>
+            <th>Quantidade</th>
           <% end %>
-          <th>Distributor</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th>Distribuidor</th>
+          <th>Estado</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -104,18 +104,22 @@
               <td><%= delivery.customer.bread_quantity %></td>
             <% end %>
             <td><%= delivery.distributor.email %></td>
-            <td><%= delivery.status %></td>
+            <td><%= delivery_status(delivery.status) %></td>
             <td>
-              <%= link_to "Edit", edit_delivery_path(delivery) %>
-              <% if current_user.admin? %>
-                | <%= button_to "Delete", delivery_path(delivery), method: :delete, data: { confirm: "Are you sure?" } %>
-              <% end %>
+              <div class="table-actions">
+                <%= link_to "Editar", edit_delivery_path(delivery), class: "btn btn-small" %>
+                <% if current_user.admin? %>
+                  <%= button_to "Eliminar", delivery_path(delivery), method: :delete,
+                        class: "btn btn-small btn-danger", form_class: "inline-form",
+                        data: { turbo_confirm: "Tem a certeza de que pretende eliminar esta entrega?" } %>
+                <% end %>
+              </div>
             </td>
           </tr>
         <% end %>
         <% if current_user.role == "distributor" %>
           <tr style="font-weight:600; background:#f9fafb;">
-            <td colspan="2">Total Bread Qty</td>
+            <td colspan="2">Total de pães</td>
             <td><%= @day_totals[day] %></td>
             <td colspan="3"></td>
           </tr>

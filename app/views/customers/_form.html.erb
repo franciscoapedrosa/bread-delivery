@@ -1,20 +1,20 @@
-<%= render "shared/error_messages", object: @customer, title: "Couldn't save customer:" %>
+<%= render "shared/error_messages", object: @customer, title: "Não foi possível guardar o cliente:" %>
 
 <%= form_with(model: @customer, local: true) do |form| %>
   <p>
-    <%= form.label :name %><br>
+    <%= form.label :name, "Nome" %><br>
     <%= form.text_field :name %>
   </p>
 
   <p>
-    <%= form.label :address %><br>
+    <%= form.label :address, "Morada" %><br>
     <%= form.text_field :address %>
   </p>
 
   <p>
-    <%= form.label :bread_quantity %><br>
+    <%= form.label :bread_quantity, "Quantidade de pão" %><br>
     <%= form.number_field :bread_quantity %>
   </p>
 
-  <p><%= form.submit %></p>
+  <p><%= form.submit "Guardar", class: "btn btn-primary" %></p>
 <% end %>

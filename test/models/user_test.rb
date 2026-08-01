@@ -5,7 +5,7 @@ class UserTest < ActiveSupport::TestCase
     user = User.new(email: "invalid@example.com", password: "password123", role: "driver")
 
     assert_not user.valid?
-    assert_includes user.errors[:role], "is not included in the list"
+    assert_includes user.errors[:role], "não está incluído na lista"
   end
 
   test "role helpers identify users" do

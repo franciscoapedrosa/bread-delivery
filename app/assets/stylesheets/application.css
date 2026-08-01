@@ -138,6 +138,19 @@ body {
 }
 .btn-primary:hover { filter: brightness(1.05); }
 
+.btn-danger {
+  background: #fff;
+  color: #b42318;
+  border-color: #f0b4ae;
+}
+.btn-danger:hover { background: #fff4f2; border-color: #e38b82; }
+
+.btn-small {
+  min-height: 36px;
+  padding: .35rem .65rem;
+  white-space: nowrap;
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--text);
@@ -161,6 +174,19 @@ body {
 .logout {
   margin-top: 1rem;
 }
+
+.auth-card {
+  width: min(100%, 30rem);
+  margin: 3rem auto;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.field, .actions { margin-bottom: 1rem; }
+.checkbox-field { display: flex; align-items: center; gap: .5rem; }
 
 /* Tables  */
 table {
@@ -211,6 +237,34 @@ tr + tr td {
   margin: .5rem 0 1rem;
 }
 
+.week-action-form {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.week-select { width: 15rem; }
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inline-form { display: inline-flex; margin: 0; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 input, select, textarea, button {
   max-width: 100%;
   font: inherit;
@@ -244,7 +298,7 @@ button, input[type="submit"], .btn, .btn-back { min-height: 44px; }
     -webkit-overflow-scrolling: touch;
   }
   th, td { padding: 10px 12px; white-space: nowrap; }
-  .action-bar form { width: 100%; }
-  .action-bar select { width: 100%; margin-bottom: .5rem; }
+  .week-action-form { width: 100%; flex-direction: column; }
+  .action-bar select,
   .action-bar input[type="submit"] { width: 100%; }
 }

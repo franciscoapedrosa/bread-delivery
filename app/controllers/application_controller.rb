@@ -14,6 +14,6 @@ class ApplicationController < ActionController::Base
   def require_admin!
     return if current_user.admin?
 
-    redirect_to authenticated_root_path, alert: "Access denied."
+    redirect_to authenticated_root_path, alert: "Acesso negado."
   end
 end
