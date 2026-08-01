@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: bread-delivery
+    runtime: ruby
+    plan: free
+    region: frankfurt
+    buildCommand: bin/render-build.sh
+    startCommand: bin/rails server -b 0.0.0.0
+    healthCheckPath: /up
+    autoDeployTrigger: commit
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: SEED_PASSWORD
+        sync: false
+      - key: APP_HOST
+        sync: false
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: RAILS_MAX_THREADS
+        value: "3"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
