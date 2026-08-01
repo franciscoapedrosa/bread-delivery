@@ -23,6 +23,18 @@
   </head>
 
   <body>
-    <%= yield %>
+    <main class="site-shell">
+      <% if user_signed_in? %>
+        <nav class="top-nav" aria-label="Main navigation">
+          <%= link_to "Back to Home", authenticated_root_path, class: "btn-back" %>
+        </nav>
+      <% end %>
+
+      <% flash.each do |type, message| %>
+        <div class="flash <%= type %>" role="status"><%= message %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
   </body>
 </html>

@@ -1,0 +1,30 @@
+<h1>Delivery</h1>
+
+<p>
+  <strong>Route:</strong>
+  <%= @delivery.route.name %>
+</p>
+
+<p>
+  <strong>Day of Week:</strong>
+  <%= @delivery.day_of_week.capitalize %>
+</p>
+
+
+<p>
+  <strong>Customer:</strong>
+  <%= @delivery.customer.name %>
+</p>
+
+<p>
+  <strong>Distributor:</strong>
+  <%= @delivery.distributor.email %>
+</p>
+
+<p>
+  <strong>Status:</strong>
+  <%= @delivery.status %>
+</p>
+
+<%= link_to "Edit", edit_delivery_path(@delivery) %> |
+<%= link_to "Back", deliveries_path %>

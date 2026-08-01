@@ -1,0 +1,126 @@
+<h1>Deliveries</h1>
+
+<div class="action-bar">
+  <%= form_with url: reset_week_deliveries_path, method: :post, local: true do |f| %>
+    <%= f.select :day,
+          [["All week",""], ["Monday","monday"], ["Tuesday","tuesday"], ["Wednesday","wednesday"],
+           ["Thursday","thursday"], ["Friday","friday"], ["Saturday","saturday"], ["Sunday","sunday"]],
+          {}, class: "btn" %>
+    <%= f.submit "Reset", class: "btn btn-primary",
+          data: { turbo_confirm: "Set selected deliveries to pending?" } %>
+  <% end %>
+
+  <% if current_user.role == "admin" %>
+    <%= form_with url: destroy_week_deliveries_path, method: :delete, local: true do |f| %>
+      <%= f.select :day,
+            [["All week",""], ["Monday","monday"], ["Tuesday","tuesday"], ["Wednesday","wednesday"],
+             ["Thursday","thursday"], ["Friday","friday"], ["Saturday","saturday"], ["Sunday","sunday"]],
+            {}, class: "btn" %>
+      <%= f.submit "Delete", class: "btn",
+            data: { turbo_confirm: "Delete selected deliveries? This cannot be undone." } %>
+    <% end %>
+  <% end %>
+</div>
+
+
+<% if current_user.admin? %>
+  <%= link_to "New Delivery", new_delivery_path, class: "btn btn-primary" %>
+
+  <div class="card" style="margin-top:1rem;">
+    <h2 class="card-title">Weekly summary</h2>
+    <p class="card-text" style="margin:.25rem 0 1rem;">
+      Total breads this week: <strong><%= @weekly_total_admin %></strong>
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3 class="card-title">Total by day</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Total Bread Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @day_totals_admin.each do |day, total| %>
+              <% next if total.zero? %>
+              <tr>
+                <td><%= day.capitalize %></td>
+                <td><%= total %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Total by distributor</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Distributor</th>
+              <th>Total Bread Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @totals_by_distributor.each do |user, total| %>
+              <tr>
+                <td><%= user&.email || "—" %></td>
+                <td><%= total %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @deliveries_by_day.blank? %>
+  <p>No deliveries this week.</p>
+<% else %>
+  <% @deliveries_by_day.each do |day, deliveries| %>
+    <h2><%= day.capitalize %></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Route</th>
+          <th>Customer</th>
+          <% if current_user.role == "distributor" %>
+            <th>Bread Qty</th>
+          <% end %>
+          <th>Distributor</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% deliveries.each do |delivery| %>
+          <tr>
+            <td><%= delivery.route.name %></td>
+            <td><%= delivery.customer.name %></td>
+            <% if current_user.role == "distributor" %>
+              <td><%= delivery.customer.bread_quantity %></td>
+            <% end %>
+            <td><%= delivery.distributor.email %></td>
+            <td><%= delivery.status %></td>
+            <td>
+              <%= link_to "Edit", edit_delivery_path(delivery) %>
+              <% if current_user.admin? %>
+                | <%= button_to "Delete", delivery_path(delivery), method: :delete, data: { confirm: "Are you sure?" } %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+        <% if current_user.role == "distributor" %>
+          <tr style="font-weight:600; background:#f9fafb;">
+            <td colspan="2">Total Bread Qty</td>
+            <td><%= @day_totals[day] %></td>
+            <td colspan="3"></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>

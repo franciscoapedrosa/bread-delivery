@@ -1,0 +1,11 @@
+one:
+  name: Customer One
+  address: First Street
+  bread_quantity: 2
+  active: true
+
+two:
+  name: Customer Two
+  address: Second Street
+  bread_quantity: 3
+  active: true

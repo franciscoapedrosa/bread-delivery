@@ -1,0 +1,10 @@
+<%= render "shared/error_messages", object: @route, title: "Couldn't save route:" %>
+
+<%= form_with(model: @route, local: true) do |form| %>
+  <p>
+    <%= form.label :name %><br>
+    <%= form.text_field :name %>
+  </p>
+
+  <p><%= form.submit %></p>
+<% end %>

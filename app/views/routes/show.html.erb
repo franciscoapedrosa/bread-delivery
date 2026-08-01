@@ -1,0 +1,9 @@
+<h1>Route: <%= @route.name %></h1>
+
+<p>
+  <strong>Name:</strong>
+  <%= @route.name %>
+</p>
+
+<%= link_to "Edit", edit_route_path(@route) %> |
+<%= link_to "Back", routes_path %>

@@ -1,0 +1,72 @@
+<div class="container">
+  <h1 class="page-title">Bread Delivery</h1>
+  <p class="subtitle">Welcome, <strong><%= current_user.email %></strong></p>
+
+  <% if current_user.admin? %>
+    <section>
+      <h2 class="section-title">Admin area</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">👤</div>
+          <h3 class="card-title">Human Resources</h3>
+          <p class="card-text">Create, edit and remove users.</p>
+          <%= link_to "Open", users_path, class: "btn btn-primary" %>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🧍‍♀️</div>
+          <h3 class="card-title">Customers</h3>
+          <p class="card-text">Active and inactive customers.</p>
+          <%= link_to "Open", customers_path, class: "btn" %>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🗺️</div>
+          <h3 class="card-title">Routes</h3>
+          <p class="card-text">Weekly routes configuration.</p>
+          <%= link_to "Open", routes_path, class: "btn" %>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <h3 class="card-title">Deliveries</h3>
+          <p class="card-text">Track all deliveries and status.</p>
+          <%= link_to "Open", deliveries_path, class: "btn" %>
+        </div>
+      </div>
+    </section>
+  <% else %>
+    <section>
+      <h2 class="section-title">Distributor area</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <h3 class="card-title">My Deliveries</h3>
+          <p class="card-text">View and update your delivery status.</p>
+          <%= link_to "Open", deliveries_path, class: "btn btn-primary" %>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🗺️</div>
+          <h3 class="card-title">My Routes</h3>
+          <p class="card-text">Check your weekly assigned routes.</p>
+          <%= link_to "Open", routes_path, class: "btn" %>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🧍‍♀️</div>
+          <h3 class="card-title">My Customers</h3>
+          <p class="card-text">See addresses and bread quantity for this week.</p>
+          <%= link_to "Open", my_customers_path, class: "btn" %>        
+        </div>
+      </div>
+  </section>
+<% end %>
+</div>
+
+
+<div class="logout">
+  <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-ghost" %>
+</div>

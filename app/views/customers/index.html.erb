@@ -1,0 +1,56 @@
+<h1>Customers</h1>
+
+<%= link_to "New Customer", new_customer_path, class: "btn btn-primary" %>
+
+<h2>Active Customers</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Address</th>
+      <th>Bread Quantity</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @active_customers.each do |customer| %>
+      <tr>
+        <td><%= link_to customer.name, customer_path(customer) %></td>
+        <td><%= customer.address %></td>
+        <td><%= customer.bread_quantity %></td>
+        <td>Active</td>
+        <td>
+          <%= link_to "Edit", edit_customer_path(customer) %> |
+          <%= button_to "Deactivate", deactivate_customer_path(customer), method: :patch, data: { turbo_method: :patch, confirm: "Are you sure you want to deactivate this customer?" } %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>Inactive Customers</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Address</th>
+      <th>Bread Quantity</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @inactive_customers.each do |customer| %>
+      <tr>
+        <td><%= link_to customer.name, customer_path(customer) %></td>
+        <td><%= customer.address %></td>
+        <td><%= customer.bread_quantity %></td>
+        <td>Inactive</td>
+        <td>
+        <%= button_to "Reactivate", activate_customer_path(customer), method: :patch, data: { confirm: "Are you sure you want to reactivate this customer?" } %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,25 @@
+<% if customers.blank? %>
+  <p>No customers assigned this week.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Address</th>
+        <th>Bread Qty</th>
+        <th>Days</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% customers.each do |customer| %>
+        <% days = (days_by_customer[customer.id] || []).map(&:capitalize).join(", ") %>
+        <tr>
+          <td><%= customer.name %></td>
+          <td><%= customer.address %></td>
+          <td><%= customer.bread_quantity %></td>
+          <td><%= days.presence || "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

@@ -1,0 +1,32 @@
+<%= render "shared/error_messages", object: @delivery, title: "Couldn't save delivery:" %>
+
+<%= form_with(model: @delivery, local: true) do |form| %>
+  <% if current_user.admin? %>
+    <div>
+      <%= form.label :route_id, "Route" %><br>
+      <%= form.collection_select :route_id, Route.all, :id, :name %>
+    </div>
+
+    <div>
+      <%= form.label :customer_id, "Customer" %><br>
+      <%= form.collection_select :customer_id, Customer.active, :id, :name %>
+    </div>
+
+    <div>
+      <%= form.label :distributor_id, "Distributor" %><br>
+      <%= form.collection_select :distributor_id, User.where(role: "distributor"), :id, :email %>
+    </div>
+
+    <div>
+      <%= form.label :day_of_week, "Day of Week" %><br>
+      <%= form.select :day_of_week, %w[monday tuesday wednesday thursday friday saturday sunday].map { |d| [d.capitalize, d] } %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :status %><br>
+    <%= form.select :status, ["pending", "delivered", "cancelled"] %>
+  </div>
+
+  <p><%= form.submit %></p>
+<% end %>

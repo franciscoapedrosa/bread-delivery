@@ -1,0 +1,14 @@
+<h1>Customer: <%= @customer.name %></h1>
+
+<p>
+  <strong>Address:</strong>
+  <%= @customer.address %>
+</p>
+
+<p>
+  <strong>Bread Quantity:</strong>
+  <%= @customer.bread_quantity %>
+</p>
+
+<%= link_to "Edit", edit_customer_path(@customer) %> |
+<%= link_to "Back", customers_path %>

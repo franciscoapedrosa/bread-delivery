@@ -1,0 +1,27 @@
+<h1>Human Resources</h1>
+
+<%= link_to "New User", new_user_path, class: "btn btn-primary" %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Actions</th>
+      </tr>
+  </thead>
+
+  <tbody>
+    <% @users.each do |user| %>
+      <tr>
+        <td><%= user.email %></td>
+        <td><%= user.role %></td>
+        <td>
+          <%= link_to "Edit", edit_user_path(user) %> |
+          <%= link_to "Delete", user_path(user),
+                data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
