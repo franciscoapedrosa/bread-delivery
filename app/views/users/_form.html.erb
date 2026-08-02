@@ -15,12 +15,18 @@
     <%= form.text_field :email %>
   </div>
 
-  <% if action_name == "new" %>
-    <div class="field">
-      <%= form.label :password, "Palavra-passe" %><br>
-      <%= form.password_field :password %>
-    </div>
-  <% end %>
+  <div class="field">
+    <%= form.label :password, action_name == "new" ? "Palavra-passe" : "Nova palavra-passe" %><br>
+    <%= form.password_field :password, autocomplete: "new-password" %>
+    <% unless action_name == "new" %>
+      <small class="field-hint">Deixe em branco para manter a palavra-passe atual.</small>
+    <% end %>
+  </div>
+
+  <div class="field">
+    <%= form.label :password_confirmation, "Confirmar palavra-passe" %><br>
+    <%= form.password_field :password_confirmation, autocomplete: "new-password" %>
+  </div>
 
   <div class="field">
     <%= form.label :role, "Função" %><br>

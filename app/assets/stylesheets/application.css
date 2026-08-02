@@ -187,6 +187,7 @@ body {
 
 .field, .actions { margin-bottom: 1rem; }
 .checkbox-field { display: flex; align-items: center; gap: .5rem; }
+.field-hint { display: block; margin-top: .35rem; color: var(--muted); }
 
 /* Tables  */
 table {

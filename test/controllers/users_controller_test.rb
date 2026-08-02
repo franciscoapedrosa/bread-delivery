@@ -18,4 +18,22 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in admin
     assert_no_difference("User.count") { delete user_url(admin) }
   end
+
+  test "admin can reset a distributor password" do
+    admin = users(:admin)
+    distributor = users(:distributor)
+    sign_in admin
+
+    patch user_url(distributor), params: {
+      user: {
+        email: distributor.email,
+        role: distributor.role,
+        password: "nova-password-123",
+        password_confirmation: "nova-password-123"
+      }
+    }
+
+    assert_redirected_to user_url(distributor)
+    assert distributor.reload.valid_password?("nova-password-123")
+  end
 end
