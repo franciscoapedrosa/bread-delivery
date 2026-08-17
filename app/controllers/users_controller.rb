@@ -18,6 +18,7 @@ class UsersController < ApplicationController
 
   def create
     @user = User.new(user_params)
+    @user.role = requested_role
     if @user.save
       redirect_to @user, notice: "Utilizador criado com sucesso."
     else
@@ -26,18 +27,16 @@ class UsersController < ApplicationController
   end
 
   def update
-    if params[:user][:password].blank?
-      if @user.update(user_params.except(:password, :password_confirmation))
-        redirect_to @user, notice: "Utilizador atualizado com sucesso."
-      else
-        render :edit, status: :unprocessable_entity
-      end
+    attributes = user_params
+    attributes = attributes.except(:password, :password_confirmation) if attributes[:password].blank?
+
+    @user.assign_attributes(attributes)
+    @user.role = requested_role
+
+    if @user.save
+      redirect_to @user, notice: "Utilizador atualizado com sucesso."
     else
-      if @user.update(user_params)
-        redirect_to @user, notice: "Utilizador atualizado com sucesso."
-      else
-        render :edit, status: :unprocessable_entity
-      end
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -58,6 +57,11 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :role)
+    params.require(:user).permit(:email, :password, :password_confirmation)
+  end
+
+  def requested_role
+    role = params.require(:user).fetch(:role, nil)
+    role if User::ROLES.include?(role)
   end
 end

@@ -36,4 +36,17 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to user_url(distributor)
     assert distributor.reload.valid_password?("nova-password-123")
   end
+
+  test "unsupported roles are rejected" do
+    admin = users(:admin)
+    distributor = users(:distributor)
+    sign_in admin
+
+    patch user_url(distributor), params: {
+      user: { email: distributor.email, role: "owner", password: "" }
+    }
+
+    assert_response :unprocessable_entity
+    assert_equal "distributor", distributor.reload.role
+  end
 end

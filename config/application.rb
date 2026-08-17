@@ -19,6 +19,9 @@ module BreadDelivery
     config.i18n.default_locale = :pt
     config.i18n.available_locales = %i[pt en]
 
+    # This application does not create Active Storage image variants.
+    config.active_storage.variant_processor = :disabled
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
