@@ -117,6 +117,42 @@ body {
   color: var(--muted);
 }
 
+/* Weekly delivery summary */
+.weekly-summary {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-panel {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.summary-table {
+  box-shadow: none;
+}
+
+.summary-table th:last-child,
+.summary-table td:last-child {
+  width: 9rem;
+}
+
+.summary-table td:first-child {
+  overflow-wrap: anywhere;
+}
+
 /* Buttons */
 .btn {
   display: inline-block;
@@ -302,4 +338,10 @@ button, input[type="submit"], .btn, .btn-back { min-height: 44px; }
   .week-action-form { width: 100%; flex-direction: column; }
   .action-bar select,
   .action-bar input[type="submit"] { width: 100%; }
+  .weekly-summary { padding: 1rem; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .summary-panel { padding: .75rem; }
+  .summary-table { display: table; }
+  .summary-table th,
+  .summary-table td { white-space: normal; }
 }

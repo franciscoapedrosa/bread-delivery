@@ -26,16 +26,16 @@
 <% if current_user.admin? %>
   <%= link_to "Nova entrega", new_delivery_path, class: "btn btn-primary" %>
 
-  <div class="card" style="margin-top:1rem;">
+  <section class="weekly-summary">
     <h2 class="card-title">Resumo semanal</h2>
     <p class="card-text" style="margin:.25rem 0 1rem;">
       Total de pães esta semana: <strong><%= @weekly_total_admin %></strong>
     </p>
 
-    <div class="card-grid">
-      <div class="card">
+    <div class="summary-grid">
+      <div class="summary-panel">
         <h3 class="card-title">Total por dia</h3>
-        <table>
+        <table class="summary-table">
           <thead>
             <tr>
               <th>Dia</th>
@@ -54,9 +54,9 @@
         </table>
       </div>
 
-      <div class="card">
+      <div class="summary-panel">
         <h3 class="card-title">Total por distribuidor</h3>
-        <table>
+        <table class="summary-table">
           <thead>
             <tr>
               <th>Distribuidor</th>
@@ -74,7 +74,7 @@
         </table>
       </div>
     </div>
-  </div>
+  </section>
 <% end %>
 
 <% if @deliveries_by_day.blank? %>
