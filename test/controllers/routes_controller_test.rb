@@ -4,9 +4,7 @@ class RoutesControllerTest < ActionDispatch::IntegrationTest
   test "distributor sees only assigned routes" do
     sign_in users(:distributor)
     get routes_url
-    assert_response :success
-    assert_select "li", text: routes(:one).name
-    assert_select "li", text: routes(:two).name, count: 0
+    assert_redirected_to route_runs_url
   end
 
   test "distributor cannot edit a route" do

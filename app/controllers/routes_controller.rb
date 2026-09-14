@@ -3,6 +3,10 @@ class RoutesController < ApplicationController
   before_action :require_admin!, except: :index
 
   def index
+    unless current_user.admin?
+      redirect_to route_runs_path
+      return
+    end
     if current_user.admin?
       @routes = Route.all
     else

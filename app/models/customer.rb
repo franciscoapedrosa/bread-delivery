@@ -1,6 +1,9 @@
 class Customer < ApplicationRecord
   has_many :deliveries, dependent: :destroy
-  has_many :routes, through: :deliveries
+  belongs_to :user, optional: true
+  has_many :route_stops, dependent: :destroy
+  has_many :routes, through: :route_stops
+  has_many :scheduled_stops, dependent: :restrict_with_error
 
   validates :name, :address, :bread_quantity, presence: true
   validates :bread_quantity, numericality: { greater_than: 0 }

@@ -1,4 +1,5 @@
 class DeliveriesController < ApplicationController
+  before_action :deny_customer
   before_action :set_delivery, only: %i[show edit update destroy]
   before_action :authorize_delivery!, only: %i[show edit update destroy]
   before_action :require_admin!, only: %i[new create destroy_week]
@@ -99,6 +100,10 @@ end
 
 
   private
+
+  def deny_customer
+    redirect_to scheduled_stops_path, alert: "Consulte os seus pedidos de pão." if current_user.customer?
+  end
 
   def set_delivery
     @delivery = Delivery.find(params[:id])

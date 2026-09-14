@@ -10,7 +10,7 @@
         <div class="card">
           <div class="card-icon">👥</div>
           <h3 class="card-title">Utilizadores</h3>
-          <p class="card-text">Adicione, altere ou elimine administradores e distribuidores.</p>
+          <p class="card-text">Crie contas de clientes, distribuidores e administradores.</p>
           <%= link_to "Abrir", users_path, class: "btn btn-primary" %>
         </div>
 
@@ -32,9 +32,21 @@
           <div class="card-icon">📦</div>
           <h3 class="card-title">Entregas</h3>
           <p class="card-text">Acompanhe todas as entregas e os seus estados.</p>
-          <%= link_to "Abrir", deliveries_path, class: "btn" %>
+          <%= link_to "Abrir", route_runs_path, class: "btn" %>
+        </div>
+        <div class="card">
+          <div class="card-icon">🍞</div>
+          <h3 class="card-title">Pedidos de pão</h3>
+          <p class="card-text">Aprove as quantidades pedidas pelos clientes.</p>
+          <%= link_to "Ver pedidos", scheduled_stops_path, class: "btn" %>
         </div>
       </div>
+    </section>
+  <% elsif current_user.customer? %>
+    <section class="card">
+      <h2>O meu pão</h2>
+      <p>Escolha a quantidade para os dias de entrega marcados. Envie o pedido até às 23h do dia anterior.</p>
+      <%= link_to "Pedir pão e consultar pedidos", scheduled_stops_path, class: "btn btn-primary" %>
     </section>
   <% else %>
     <section>
@@ -45,7 +57,7 @@
           <div class="card-icon">📦</div>
           <h3 class="card-title">As minhas entregas</h3>
           <p class="card-text">Consulte e atualize o estado das suas entregas.</p>
-          <%= link_to "Abrir", deliveries_path, class: "btn btn-primary" %>
+          <%= link_to "Abrir", route_runs_path, class: "btn btn-primary" %>
         </div>
 
         <div class="card">
@@ -59,7 +71,7 @@
           <div class="card-icon">🧍‍♀️</div>
           <h3 class="card-title">Os meus clientes</h3>
           <p class="card-text">Consulte as moradas e quantidades de pão desta semana.</p>
-          <%= link_to "Abrir", my_customers_path, class: "btn" %>
+          <%= link_to "Ver locais de entrega", route_runs_path, class: "btn" %>
         </div>
       </div>
   </section>

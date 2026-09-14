@@ -30,8 +30,21 @@
 
   <div class="field">
     <%= form.label :role, "Função" %><br>
-    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"]] %>
+    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"], ["Cliente", "customer"]] %>
   </div>
+
+  <fieldset class="card">
+    <legend>Dados para contas de cliente</legend>
+    <p>Preencha apenas se escolheu a função Cliente. A morada será usada para obter direções.</p>
+    <% if @user.new_record? %>
+      <%= label_tag "user_existing_customer_id", "Associar a um cliente que já existe (opcional)" %>
+      <%= select_tag "user[existing_customer_id]", options_from_collection_for_select(Customer.where(user_id: nil).order(:name), :id, :name), include_blank: "Criar cliente novo com os dados abaixo" %>
+    <% end %>
+    <%= form.fields_for :customer, @user.customer || Customer.new do |fields| %>
+      <p><%= fields.label :name, "Nome do cliente" %><%= fields.text_field :name %></p>
+      <p><%= fields.label :address, "Morada completa (rua, número, código postal e localidade)" %><%= fields.text_field :address %></p>
+    <% end %>
+  </fieldset>
 
   <div class="actions">
     <%= form.submit "Guardar", class: "btn btn-primary" %>

@@ -99,10 +99,10 @@ body {
 }
 
 @media (min-width: 640px) {
-  .card { grid-column: span 6; }
+  .card-grid > .card { grid-column: span 6; }
 }
 @media (min-width: 900px) {
-  .card { grid-column: span 3; }
+  .card-grid > .card { grid-column: span 3; }
 }
 
 .card-icon {
@@ -313,6 +313,7 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
+input[type="date"],
 select,
 textarea {
   box-sizing: border-box;
@@ -325,6 +326,39 @@ textarea {
 }
 
 button, input[type="submit"], .btn, .btn-back { min-height: 44px; }
+
+/* Date-based planning and an accessible, numbered delivery journey. */
+.planning-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1rem; margin: 1rem 0; }
+.planning-grid > .card { grid-column: auto; }
+.plan-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin: 1rem 0; }
+.plan-actions > * { min-width: 0; }
+.plan-actions select { width: auto; }
+.plan-actions form { margin: 0; }
+.plan-day { margin: 2rem 0; }
+.bread-total { font-size: 1.8rem; font-weight: 750; margin: .25rem 0; color: #174f3c; }
+.state-pill { display: inline-flex; align-items: center; align-self: flex-start; padding: .3rem .75rem; border-radius: 999px; font-weight: 650; font-size: .95rem; border: 1px solid; }
+.state-pending { color: #714600; background: #fff3c4; border-color: #e9cc68; }
+.state-delivered { color: #14532d; background: #dcfce7; border-color: #86cda0; }
+.state-cancelled { color: #991b1b; background: #fee2e2; border-color: #efa5a5; }
+.journey { list-style: none; padding: 0; margin: 1.5rem 0; position: relative; }
+.journey-stop { display: flex; flex-direction: row; gap: 1rem; margin: 0 0 1.25rem; position: relative; }
+.journey-stop:not(:last-child)::after { content: ""; position: absolute; left: 2.4rem; top: 100%; height: 1.25rem; border-left: 3px solid #b9c9df; }
+.step-number { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #e9efff; color: #2046a1; font-weight: 750; }
+.stop-body { flex: 1; min-width: 0; }
+.stop-body h3 { font-size: 1.3rem; margin: .5rem 0; }
+.stop-body p { margin: .6rem 0; }
+.order-input { max-width: 6rem; }
+summary { cursor: pointer; min-height: 44px; padding: .5rem 0; font-weight: 600; }
+label { display: block; font-weight: 600; margin-bottom: .3rem; }
+.plan-actions label { margin: 0; }
+:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 3px; }
+.btn-primary:hover { background: #1d4ed8; color: white; }
+@media (max-width: 639px) {
+  .journey-stop { padding: .8rem; gap: .6rem; }
+  .plan-actions > .btn, .plan-actions > form, .plan-actions > select, .plan-actions > input[type="submit"] { width: 100%; }
+  .plan-actions > form > button { width: 100%; }
+  h1 { font-size: 1.8rem; }
+}
 
 @media (max-width: 639px) {
   .site-shell { width: min(100% - 1rem, 1100px); }

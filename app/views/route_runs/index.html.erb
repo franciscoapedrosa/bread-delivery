@@ -1,0 +1,37 @@
+<h1><%= current_user.admin? ? "Entregas da semana" : "As minhas rotas" %></h1>
+<div class="plan-actions">
+  <%= link_to "← Semana anterior", route_runs_path(week: @week - 7), class: "btn" %>
+  <strong><%= @week.strftime('%d/%m/%Y') %> a <%= @week.end_of_week.strftime('%d/%m/%Y') %></strong>
+  <%= link_to "Semana seguinte →", route_runs_path(week: @week + 7), class: "btn" %>
+</div>
+<% if current_user.admin? %>
+  <div class="plan-actions">
+    <%= link_to "Marcar dia de entrega", new_route_run_path, class: "btn btn-primary" %>
+    <%= link_to "Aprovar pedidos de pão", scheduled_stops_path, class: "btn" %>
+    <%= link_to "Organizar rotas e clientes", routes_path, class: "btn" %>
+  </div>
+<% end %>
+<section class="card"><h2>Pão aprovado nesta semana</h2><p class="bread-total"><%= @runs.sum(&:total_bread) %> pães</p><p>As entregas canceladas e os pedidos por aprovar não entram no total.</p></section>
+<% (@week..@week.end_of_week).each do |date| %>
+  <% runs = @runs.select { |run| run.delivery_date == date } %>
+  <section class="plan-day">
+    <h2><%= delivery_date_label(date) %></h2>
+    <% if runs.empty? %><p>Sem rotas marcadas para este dia.</p><% end %>
+    <div class="planning-grid">
+      <% runs.each do |run| %>
+        <article class="card">
+          <p>Rota <%= run.position %> do dia · <%= run.distributor.email %></p>
+          <h3><%= run.route.name %></h3>
+          <p><strong><%= run.total_bread %> pães aprovados</strong> · <%= run.scheduled_stops.size %> locais</p>
+          <div class="plan-actions">
+            <% %w[pending delivered cancelled].each do |status| %>
+              <span class="state-pill state-<%= status %>"><%= run.scheduled_stops.count { |s| s.status == status } %> · <%= delivery_status(status) %></span>
+            <% end %>
+          </div>
+          <%= link_to "Abrir percurso", run, class: "btn btn-primary" %>
+        </article>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+<% if current_user.admin? %><p><%= link_to "Consultar entregas do sistema anterior", deliveries_path %></p><% end %>

@@ -1,0 +1,29 @@
+<h1><%= current_user.admin? ? "Aprovar pedidos de pão" : "O meu pão" %></h1>
+<p>Os pedidos podem ser alterados até às 23h do dia anterior à entrega, hora de Lisboa. Cada alteração precisa de nova aprovação.</p>
+<% if @stops.empty? %><div class="card"><p><%= current_user.admin? ? "Não há pedidos à espera de aprovação." : "Ainda não tem dias de entrega marcados. O administrador irá indicar os dias disponíveis." %></p></div><% end %>
+<div class="planning-grid">
+  <% @stops.each do |stop| %>
+    <article class="card">
+      <h2><%= delivery_date_label(stop.route_run.delivery_date) %></h2>
+      <% if current_user.admin? %><h3><%= stop.customer.name %></h3><% end %>
+      <p><%= stop.route_run.route.name %> · <%= stop.address %></p>
+      <span class="state-pill state-<%= stop.approval_status == 'approved' ? 'delivered' : stop.approval_status == 'rejected' ? 'cancelled' : 'pending' %>"><%= approval_name(stop.approval_status) %></span>
+      <p>Pedido: <strong><%= stop.requested_quantity.nil? ? "Por indicar" : "#{stop.requested_quantity} pães" %></strong></p>
+      <p>Entrega: <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span></p>
+      <p>Prazo: <strong><%= stop.route_run.cutoff.strftime('%d/%m/%Y às %H:%M') %></strong></p>
+      <% if current_user.admin? %>
+        <div class="plan-actions">
+          <%= button_to "Aprovar #{stop.requested_quantity} pães", approve_scheduled_stop_path(stop), method: :patch, params: { requested_quantity: stop.requested_quantity }, class: "btn btn-primary" %>
+          <%= button_to "Recusar", reject_scheduled_stop_path(stop), method: :patch, params: { requested_quantity: stop.requested_quantity }, class: "btn btn-danger" %>
+          <%= link_to "Ver percurso", stop.route_run, class: "btn" %>
+        </div>
+      <% elsif stop.open_for_request? %>
+        <%= form_with model: stop do |f| %>
+          <p><%= f.label :requested_quantity, "Quantos pães precisa?", for: "quantity_#{stop.id}" %><%= f.number_field :requested_quantity, min: 0, max: 100000, step: 1, required: true, inputmode: "numeric", id: "quantity_#{stop.id}" %></p>
+          <p>Se não precisar de pão neste dia, indique 0.</p>
+          <%= f.submit "Enviar pedido", class: "btn btn-primary" %>
+        <% end %>
+      <% else %><p>O pedido está fechado. Para alterações, contacte o administrador.</p><% end %>
+    </article>
+  <% end %>
+</div>

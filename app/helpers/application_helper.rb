@@ -24,6 +24,14 @@ module ApplicationHelper
   end
 
   def role_name(role)
-    role == "admin" ? "Administrador" : "Distribuidor"
+    { "admin" => "Administrador", "distributor" => "Distribuidor", "customer" => "Cliente" }.fetch(role, role)
+  end
+
+  def approval_name(status)
+    { "awaiting_request" => "Falta pedir pão", "pending" => "Aguarda aprovação", "approved" => "Aprovado", "rejected" => "Recusado" }.fetch(status, status)
+  end
+
+  def delivery_date_label(date)
+    "#{day_name(date.strftime('%A').downcase)}, #{date.strftime('%d/%m/%Y')}"
   end
 end

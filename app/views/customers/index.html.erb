@@ -1,6 +1,7 @@
 <h1>Clientes</h1>
 
-<%= link_to "Novo cliente", new_customer_path, class: "btn btn-primary" %>
+<%= link_to "Criar conta de cliente", new_user_path, class: "btn btn-primary" %>
+<%= link_to "Aprovar pedidos de pão", scheduled_stops_path, class: "btn" %>
 
 <h2>Clientes ativos</h2>
 <table>
@@ -8,7 +9,7 @@
     <tr>
       <th>Nome</th>
       <th>Morada</th>
-      <th>Quantidade de pão</th>
+      <th>Pão aprovado esta semana</th>
       <th>Estado</th>
       <th>Ações</th>
     </tr>
@@ -18,7 +19,7 @@
       <tr>
         <td><%= link_to customer.name, customer_path(customer) %></td>
         <td><%= customer.address %></td>
-        <td><%= customer.bread_quantity %></td>
+        <td><%= customer.scheduled_stops.joins(:route_run).where(route_runs: { delivery_date: Date.current.all_week }).where.not(status: "cancelled").sum(:approved_quantity) %></td>
         <td>Ativo</td>
         <td>
           <div class="table-actions">

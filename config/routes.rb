@@ -13,7 +13,16 @@ Rails.application.routes.draw do
   end
 
 
-  resources :routes
+  resources :route_runs, only: %i[index new create show update]
+  resources :scheduled_stops, only: %i[index update] do
+    member do
+      patch :approve
+      patch :reject
+    end
+  end
+  resources :routes do
+    resources :route_stops, only: %i[create update destroy]
+  end
   resources :deliveries do
     collection do
       post :reset_week

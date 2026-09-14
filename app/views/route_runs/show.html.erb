@@ -1,0 +1,53 @@
+<%= link_to "Voltar à semana", route_runs_path(week: @run.delivery_date), class: "btn" %>
+<h1><%= @run.route.name %></h1>
+<p><%= delivery_date_label(@run.delivery_date) %> · Rota <%= @run.position %> do dia</p>
+<p>Distribuidor: <%= @run.distributor.email %></p>
+<p class="bread-total"><%= @run.total_bread %> pães aprovados</p>
+<%= render "shared/error_messages", object: @run, title: "Verifique os dados:" %>
+<% if current_user.admin? %>
+  <details class="card">
+    <summary>Alterar distribuidor ou ordem da rota</summary>
+    <%= form_with model: @run do |f| %>
+      <p><%= f.label :distributor_id, "Distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor"), :id, :email %></p>
+      <p><%= f.label :position, "Ordem da rota neste dia" %><%= f.number_field :position, min: 1, required: true %></p>
+      <%= f.submit "Guardar", class: "btn btn-primary" %>
+    <% end %>
+  </details>
+<% end %>
+<h2>Percurso de entrega</h2>
+<ol class="journey">
+  <% @stops.each_with_index do |stop, index| %>
+    <li class="journey-stop card">
+      <span class="step-number"><%= index + 1 %></span>
+      <div class="stop-body">
+        <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span>
+        <h3><%= stop.customer.name %></h3>
+        <p><%= stop.address %></p>
+        <p><strong><%= stop.approved_quantity.nil? ? "Quantidade por aprovar" : "#{stop.approved_quantity} pães" %></strong> · <%= approval_name(stop.approval_status) %></p>
+        <details class="directions">
+          <summary class="btn">Obter direções</summary>
+          <% address = ERB::Util.url_encode(stop.address) %>
+          <div class="plan-actions">
+            <%= link_to "Google Maps", "https://www.google.com/maps/dir/?api=1&destination=#{address}&travelmode=driving", target: "_blank", rel: "noopener", class: "btn" %>
+            <%= link_to "Apple Maps", "https://maps.apple.com/?daddr=#{address}&dirflg=d", target: "_blank", rel: "noopener", class: "btn" %>
+            <%= link_to "Waze", "https://www.waze.com/ul?q=#{address}&navigate=yes", target: "_blank", rel: "noopener", class: "btn" %>
+          </div>
+        </details>
+        <%= form_with model: stop, class: "plan-actions" do |f| %>
+          <%= f.label :status, "Estado", for: "stop_#{stop.id}_status" %>
+          <%= f.select :status, [["Pendente", "pending"], ["Entregue", "delivered"], ["Cancelada", "cancelled"]], {}, id: "stop_#{stop.id}_status" %>
+          <%= f.submit "Guardar estado", class: "btn btn-primary" %>
+        <% end %>
+        <% if current_user.admin? %>
+          <details><summary>Editar este ponto de entrega</summary>
+            <%= form_with model: stop do |f| %>
+              <p><%= f.label :position, "Ordem", for: "stop_#{stop.id}_position" %><%= f.number_field :position, min: 1, id: "stop_#{stop.id}_position", required: true %></p>
+              <p><%= f.label :address, "Morada desta entrega", for: "stop_#{stop.id}_address" %><%= f.text_field :address, id: "stop_#{stop.id}_address", required: true %></p>
+              <%= f.submit "Guardar ponto de entrega", class: "btn" %>
+            <% end %>
+          </details>
+        <% end %>
+      </div>
+    </li>
+  <% end %>
+</ol>

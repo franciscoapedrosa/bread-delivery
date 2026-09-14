@@ -24,7 +24,7 @@ class CustomersController < ApplicationController
   end
 
   def new
-    @customer = Customer.new
+    redirect_to new_user_path, notice: "Crie o cliente em Utilizadores, escolhendo a função Cliente."
   end
 
   def edit

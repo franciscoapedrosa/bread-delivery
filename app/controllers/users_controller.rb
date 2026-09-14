@@ -11,14 +11,17 @@ class UsersController < ApplicationController
 
   def new
     @user = User.new
+    @user.build_customer(bread_quantity: 1)
   end
 
   def edit
+    @user.build_customer(bread_quantity: 1) unless @user.customer
   end
 
   def create
     @user = User.new(user_params)
     @user.role = requested_role
+    assign_customer_profile
     if @user.save
       redirect_to @user, notice: "Utilizador criado com sucesso."
     else
@@ -32,6 +35,7 @@ class UsersController < ApplicationController
 
     @user.assign_attributes(attributes)
     @user.role = requested_role
+    assign_customer_profile
 
     if @user.save
       redirect_to @user, notice: "Utilizador atualizado com sucesso."
@@ -51,6 +55,18 @@ class UsersController < ApplicationController
   end
 
   private
+
+  def assign_customer_profile
+    return unless @user.customer?
+
+    existing_id = params.require(:user)[:existing_customer_id]
+    if @user.new_record? && existing_id.present?
+      @user.customer = Customer.where(user_id: nil).find(existing_id)
+    else
+      profile = @user.customer || @user.build_customer(bread_quantity: 1)
+      profile.assign_attributes(params.require(:user).fetch(:customer_attributes, ActionController::Parameters.new).permit(:name, :address))
+    end
+  end
 
   def set_user
     @user = User.find(params[:id])
