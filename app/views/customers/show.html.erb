@@ -18,7 +18,11 @@
     <article class="card">
       <h3><%= delivery_date_label(stop.route_run.delivery_date) %></h3>
       <p><%= link_to stop.route_run.route.name, stop.route_run %></p>
-      <p>Pedido: <%= stop.requested_quantity || "Por indicar" %> · Aprovado: <%= stop.approved_quantity || "Por aprovar" %></p>
+      <% if stop.requested_quantity.nil? %>
+        <p>Pedido por submeter</p>
+      <% else %>
+        <p>Pedido: <%= stop.requested_quantity %> · Aprovado: <%= stop.approved_quantity || "Por aprovar" %></p>
+      <% end %>
       <p><%= approval_name(stop.approval_status) %></p>
       <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span>
     </article>

@@ -8,7 +8,7 @@
       <% if current_user.admin? %><h3><%= stop.customer.name %></h3><% end %>
       <p><%= stop.route_run.route.name %> · <%= stop.address %></p>
       <span class="state-pill state-<%= stop.approval_status == 'approved' ? 'delivered' : stop.approval_status == 'rejected' ? 'cancelled' : 'pending' %>"><%= approval_name(stop.approval_status) %></span>
-      <p>Pedido: <strong><%= stop.requested_quantity.nil? ? "Por indicar" : "#{stop.requested_quantity} pães" %></strong></p>
+      <p><strong><%= stop.requested_quantity.nil? ? "Pedido por submeter" : "Pedido: #{stop.requested_quantity} pães" %></strong></p>
       <p>Entrega: <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span></p>
       <p>Prazo: <strong><%= stop.route_run.cutoff.strftime('%d/%m/%Y às %H:%M') %></strong></p>
       <% if current_user.admin? %>

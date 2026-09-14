@@ -1,4 +1,4 @@
-<%= form_with(model: @user, local: true) do |form| %>
+<%= form_with(model: @user, local: true, data: { controller: "user-role" }) do |form| %>
   <% if @user.errors.any? %>
     <div class="error-messages">
       <h2>Não foi possível guardar o utilizador:</h2>
@@ -30,12 +30,12 @@
 
   <div class="field">
     <%= form.label :role, "Função" %><br>
-    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"], ["Cliente", "customer"]] %>
+    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"], ["Cliente", "customer"]], {}, data: { user_role_target: "role", action: "change->user-role#toggle" } %>
   </div>
 
-  <fieldset class="card">
+  <fieldset class="card" <%= "hidden disabled" unless @user.customer? %> data-user-role-target="details">
     <legend>Dados para contas de cliente</legend>
-    <p>Preencha apenas se escolheu a função Cliente. A morada será usada para obter direções.</p>
+    <p>Crie aqui o cliente e o local de entrega. Depois, o cliente entra na sua conta para submeter a quantidade de pão para os dias que marcar.</p>
     <% if @user.new_record? %>
       <%= label_tag "user_existing_customer_id", "Associar a um cliente que já existe (opcional)" %>
       <%= select_tag "user[existing_customer_id]", options_from_collection_for_select(Customer.where(user_id: nil).order(:name), :id, :name), include_blank: "Criar cliente novo com os dados abaixo" %>

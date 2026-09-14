@@ -23,7 +23,7 @@
         <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span>
         <h3><%= stop.customer.name %></h3>
         <p><%= stop.address %></p>
-        <p><strong><%= stop.approved_quantity.nil? ? "Quantidade por aprovar" : "#{stop.approved_quantity} pães" %></strong> · <%= approval_name(stop.approval_status) %></p>
+        <p><strong><%= stop.approved_quantity.nil? ? approval_name(stop.approval_status) : "#{stop.approved_quantity} pães · #{approval_name(stop.approval_status)}" %></strong></p>
         <details class="directions">
           <summary class="btn">Obter direções</summary>
           <% address = ERB::Util.url_encode(stop.address) %>

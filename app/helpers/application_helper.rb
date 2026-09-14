@@ -28,7 +28,7 @@ module ApplicationHelper
   end
 
   def approval_name(status)
-    { "awaiting_request" => "Falta pedir pão", "pending" => "Aguarda aprovação", "approved" => "Aprovado", "rejected" => "Recusado" }.fetch(status, status)
+    { "awaiting_request" => "Pedido por submeter", "pending" => "Aguarda aprovação", "approved" => "Aprovado", "rejected" => "Recusado" }.fetch(status, status)
   end
 
   def delivery_date_label(date)
