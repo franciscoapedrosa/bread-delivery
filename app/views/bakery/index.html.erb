@@ -1,0 +1,28 @@
+<h1>Pão a preparar</h1>
+<section class="card production-highlight">
+  <h2>Para amanhã · <%= Date.tomorrow.strftime('%d/%m/%Y') %></h2>
+  <p class="bread-total"><%= @tomorrow_total %> pães</p>
+  <p>Quantidade aprovada pelo administrador, somando todas as rotas de amanhã.</p>
+</section>
+<div class="plan-actions">
+  <%= link_to "← Semana anterior", bakery_path(week: @week - 7), class: "btn" %>
+  <strong><%= @week.strftime('%d/%m/%Y') %> a <%= @week.end_of_week.strftime('%d/%m/%Y') %></strong>
+  <%= link_to "Semana seguinte →", bakery_path(week: @week + 7), class: "btn" %>
+  <%= link_to "Esta semana", bakery_path, class: "btn" %>
+</div>
+<p class="bread-total">Total da semana: <%= @totals.values.sum %> pães</p>
+<p>Os totais incluem apenas pedidos aprovados. Entregas canceladas não entram na contagem. Atualize a página para consultar as últimas aprovações.</p>
+<div class="planning-grid">
+  <% (@week..@week.end_of_week).each do |date| %>
+    <article class="card">
+      <h2><%= delivery_date_label(date) %></h2>
+      <p class="bread-total"><%= @totals.fetch(date, 0) %> pães</p>
+      <% if @waiting.fetch(date, 0).positive? %>
+        <p class="state-pill state-pending"><%= @waiting[date] %> pedidos por submeter ou aprovar</p>
+        <p>Esta quantidade ainda pode aumentar.</p>
+      <% else %>
+        <p>Sem pedidos à espera de aprovação ou submissão.</p>
+      <% end %>
+    </article>
+  <% end %>
+</div>

@@ -10,7 +10,7 @@
         <div class="card">
           <div class="card-icon">👥</div>
           <h3 class="card-title">Utilizadores</h3>
-          <p class="card-text">Crie contas de clientes, distribuidores e administradores.</p>
+          <p class="card-text">Crie contas de clientes, distribuidores, padeiro e administradores.</p>
           <%= link_to "Abrir", users_path, class: "btn btn-primary" %>
         </div>
 
@@ -30,7 +30,7 @@
 
         <div class="card">
           <div class="card-icon">📦</div>
-          <h3 class="card-title">Entregas</h3>
+          <h3 class="card-title">Entregas da Semana</h3>
           <p class="card-text">Acompanhe todas as entregas e os seus estados.</p>
           <%= link_to "Abrir", route_runs_path, class: "btn" %>
         </div>
@@ -40,7 +40,25 @@
           <p class="card-text">Aprove as quantidades pedidas pelos clientes.</p>
           <%= link_to "Ver pedidos", scheduled_stops_path, class: "btn" %>
         </div>
+        <div class="card">
+          <div class="card-icon">🚐</div>
+          <h3 class="card-title">Veículos</h3>
+          <p class="card-text">Adicione fotografias e atribua os veículos aos distribuidores.</p>
+          <%= link_to "Gerir veículos", vehicles_path, class: "btn" %>
+        </div>
+        <div class="card">
+          <div class="card-icon">👨‍🍳</div>
+          <h3 class="card-title">Pão a preparar</h3>
+          <p class="card-text">Consulte os totais de pão aprovados para cada dia.</p>
+          <%= link_to "Ver semana", bakery_path, class: "btn" %>
+        </div>
       </div>
+    </section>
+  <% elsif current_user.baker? %>
+    <section class="card">
+      <h2>Pão a preparar</h2>
+      <p>Veja quantos pães precisa de preparar para amanhã e para cada dia da semana.</p>
+      <%= link_to "Ver quantidades da semana", bakery_path, class: "btn btn-primary" %>
     </section>
   <% elsif current_user.customer? %>
     <section class="card">
@@ -55,23 +73,16 @@
       <div class="card-grid">
         <div class="card">
           <div class="card-icon">📦</div>
-          <h3 class="card-title">As minhas entregas</h3>
-          <p class="card-text">Consulte e atualize o estado das suas entregas.</p>
+          <h3 class="card-title">As minhas rotas e entregas</h3>
+          <p class="card-text">Consulte os clientes por ordem, obtenha direções e registe as entregas.</p>
           <%= link_to "Abrir", route_runs_path, class: "btn btn-primary" %>
         </div>
 
         <div class="card">
-          <div class="card-icon">🗺️</div>
-          <h3 class="card-title">As minhas rotas</h3>
-          <p class="card-text">Consulte as rotas que lhe foram atribuídas esta semana.</p>
-          <%= link_to "Abrir", routes_path, class: "btn" %>
-        </div>
-
-        <div class="card">
-          <div class="card-icon">🧍‍♀️</div>
-          <h3 class="card-title">Os meus clientes</h3>
-          <p class="card-text">Consulte as moradas e quantidades de pão desta semana.</p>
-          <%= link_to "Ver locais de entrega", route_runs_path, class: "btn" %>
+          <div class="card-icon">🚐</div>
+          <h3 class="card-title">Veículos atribuídos</h3>
+          <p class="card-text">Veja a fotografia e a matrícula dos seus veículos.</p>
+          <%= link_to "Ver veículos", vehicles_path, class: "btn" %>
         </div>
       </div>
   </section>

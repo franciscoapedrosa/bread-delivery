@@ -1,0 +1,5 @@
+<% if vehicle.photo_data.present? %>
+  <%= image_tag photo_vehicle_path(vehicle), alt: "Fotografia de #{vehicle.name}", class: "vehicle-photo", loading: "lazy" %>
+<% else %>
+  <div class="vehicle-placeholder" role="img" aria-label="Veículo sem fotografia">🚐 <span>Sem fotografia</span></div>
+<% end %>

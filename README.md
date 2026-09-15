@@ -76,7 +76,19 @@ O botão de direções usa os formatos oficiais de [Google Maps](https://develop
 [Apple Maps](https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html)
 e [Waze](https://developers.google.com/waze/deeplinks). A navegação depende da aplicação instalada e da morada reconhecida pelo serviço.
 
-Veículos e contas de padeiro ficam para a fase seguinte.
+## Veículos e padeiro
+
+- Em **Veículos**, o administrador regista nome, matrícula, fotografia e distribuidor.
+  Cada veículo tem um distribuidor de cada vez; um distribuidor pode ter vários veículos.
+  A atribuição é permanente até o administrador a alterar, não depende do dia da rota.
+- As fotografias (JPEG, PNG ou WebP até 2 MB) ficam na base de dados, juntamente com o veículo,
+  para persistirem mesmo quando o serviço reinicia. Só o administrador e o distribuidor atribuído as podem consultar.
+- Em **Utilizadores**, escolher **Padeiro** cria a conta partilhada da equipa. Existe apenas uma.
+- **Pão a preparar** mostra amanhã e a semana selecionada. Soma apenas quantidades aprovadas,
+  excluindo entregas canceladas, e avisa quando há pedidos por submeter ou aprovar.
+  O padeiro tem acesso de consulta, sem poder aprovar pedidos ou alterar entregas.
+- A demonstração local também cria `padeiro.demo@example.com` com `pao-local-2026`
+  (se ainda não existir padeiro) e uma carrinha atribuída ao distribuidor de demonstração.
 
 ## Publicação gratuita
 

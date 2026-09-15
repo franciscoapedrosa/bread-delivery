@@ -2,10 +2,17 @@
 abort "A demonstração só pode ser criada em desenvolvimento." unless Rails.env.development?
 
 User.transaction do
+  unless User.exists?(role: "baker")
+    User.create!(email: "padeiro.demo@example.com", password: "pao-local-2026", role: "baker")
+  end
   distributor = User.find_or_initialize_by(email: "distribuidor.demo@example.com")
   if distributor.new_record?
     distributor.assign_attributes(role: "distributor", password: "pao-local-2026")
     distributor.save!
+  end
+  Vehicle.find_or_create_by!(registration: "DEMO01") do |vehicle|
+    vehicle.name = "Carrinha de demonstração"
+    vehicle.distributor = distributor
   end
   route = Route.find_or_create_by!(name: "Demonstração · Centro")
   [ [ "cliente.demo@example.com", "Maria (demonstração)", "Praça do Comércio, Lisboa" ],

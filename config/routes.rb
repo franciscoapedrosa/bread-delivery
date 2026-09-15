@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :users
+  get "bakery", to: "bakery#index", as: :bakery
+  resources :vehicles do
+    get :photo, on: :member
+  end
   resources :customers do
     member do
       patch :deactivate

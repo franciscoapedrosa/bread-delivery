@@ -1,0 +1,14 @@
+<h1><%= current_user.admin? ? "Veículos" : "Veículos atribuídos" %></h1>
+<% if current_user.admin? %><%= link_to "Adicionar veículo", new_vehicle_path, class: "btn btn-primary" %><% end %>
+<% if @vehicles.empty? %><p><%= current_user.admin? ? "Ainda não foram adicionados veículos." : "Ainda não tem veículos atribuídos. O administrador fará a atribuição." %></p><% end %>
+<div class="planning-grid">
+  <% @vehicles.each do |vehicle| %>
+    <article class="card">
+      <%= render "photo", vehicle: vehicle %>
+      <h2><%= vehicle.name %></h2>
+      <p class="registration"><%= vehicle.registration %></p>
+      <% if current_user.admin? %><p><%= vehicle.distributor&.email || "Sem distribuidor atribuído" %></p><% end %>
+      <%= link_to "Ver veículo", vehicle, class: "btn" %>
+    </article>
+  <% end %>
+</div>

@@ -30,7 +30,8 @@
 
   <div class="field">
     <%= form.label :role, "Função" %><br>
-    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"], ["Cliente", "customer"]], {}, data: { user_role_target: "role", action: "change->user-role#toggle" } %>
+    <%= form.select :role, [["Administrador", "admin"], ["Distribuidor", "distributor"], ["Cliente", "customer"], ["Padeiro", "baker"]], {}, data: { user_role_target: "role", action: "change->user-role#toggle" } %>
+    <p class="field-hint">A função Padeiro tem uma única conta, partilhada pela equipa, para consultar o pão a preparar.</p>
   </div>
 
   <fieldset class="card" <%= "hidden disabled" unless @user.customer? %> data-user-role-target="details">

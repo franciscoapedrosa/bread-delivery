@@ -349,6 +349,11 @@ button, input[type="submit"], .btn, .btn-back { min-height: 44px; }
 .stop-body h3 { font-size: 1.3rem; margin: .5rem 0; }
 .stop-body p { margin: .6rem 0; }
 .order-input { max-width: 6rem; }
+.vehicle-photo { width: 100%; max-height: 360px; object-fit: contain; border-radius: 10px; background: #f0f3f6; }
+.vehicle-placeholder { display: grid; place-content: center; min-height: 180px; background: #f0f3f6; border-radius: 10px; font-size: 3rem; text-align: center; }
+.vehicle-placeholder span { font-size: 1rem; }
+.registration { font-size: 1.4rem; font-weight: 700; letter-spacing: .1em; }
+.production-highlight { border-left: 5px solid #24734c; }
 summary { cursor: pointer; min-height: 44px; padding: .5rem 0; font-weight: 600; }
 label { display: block; font-weight: 600; margin-bottom: .3rem; }
 .plan-actions label { margin: 0; }

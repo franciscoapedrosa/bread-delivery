@@ -1,0 +1,13 @@
+<h1><%= @vehicle.name %></h1>
+<section class="card">
+  <%= render "photo", vehicle: @vehicle %>
+  <p class="registration"><%= @vehicle.registration %></p>
+  <p>Distribuidor: <%= @vehicle.distributor&.email || "Por atribuir" %></p>
+  <% if current_user.admin? %>
+    <div class="plan-actions">
+      <%= link_to "Editar e atribuir", edit_vehicle_path(@vehicle), class: "btn btn-primary" %>
+      <%= button_to "Eliminar veículo", @vehicle, method: :delete, class: "btn btn-danger", data: { turbo_confirm: "Eliminar este veículo e a sua fotografia?" } %>
+    </div>
+  <% end %>
+</section>
+<%= link_to "Voltar aos veículos", vehicles_path, class: "btn" %>

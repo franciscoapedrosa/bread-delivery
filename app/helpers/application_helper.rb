@@ -24,7 +24,7 @@ module ApplicationHelper
   end
 
   def role_name(role)
-    { "admin" => "Administrador", "distributor" => "Distribuidor", "customer" => "Cliente" }.fetch(role, role)
+    { "admin" => "Administrador", "distributor" => "Distribuidor", "customer" => "Cliente", "baker" => "Padeiro" }.fetch(role, role)
   end
 
   def approval_name(status)

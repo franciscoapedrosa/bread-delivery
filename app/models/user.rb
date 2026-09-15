@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  ROLES = %w[admin distributor customer].freeze
+  ROLES = %w[admin distributor customer baker].freeze
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -9,11 +9,17 @@ class User < ApplicationRecord
   has_many :deliveries, foreign_key: :distributor_id, inverse_of: :distributor, dependent: :destroy
   has_many :route_runs, foreign_key: :distributor_id, dependent: :restrict_with_error
   has_one :customer, dependent: :restrict_with_error
+  has_many :vehicles, foreign_key: :distributor_id, dependent: :nullify
   accepts_nested_attributes_for :customer
   validate :customer_profile_required
   validate :preserve_assigned_role
 
   validates :role, presence: true, inclusion: { in: ROLES }
+  validates :role, uniqueness: { message: "já tem uma conta de padeiro. Use a conta partilhada existente." }, if: :baker?
+
+  def baker?
+    role == "baker"
+  end
 
   def admin?
     role == "admin"
@@ -36,7 +42,7 @@ class User < ApplicationRecord
   def preserve_assigned_role
     return unless persisted? && will_save_change_to_role?
 
-    if customer.present? || route_runs.exists? || deliveries.exists?
+    if customer.present? || route_runs.exists? || deliveries.exists? || vehicles.exists?
       errors.add(:base, "Esta conta já tem um cliente ou entregas associados. Mantenha a sua função.")
     end
   end
