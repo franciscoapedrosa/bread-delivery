@@ -11,11 +11,18 @@
     <%= link_to "Organizar rotas e clientes", routes_path, class: "btn" %>
   </div>
 <% end %>
-<section class="card"><h2>Pão aprovado nesta semana</h2><p class="bread-total"><%= @runs.sum(&:total_bread) %> pães</p><p>As entregas canceladas e os pedidos por aprovar não entram no total.</p></section>
+<% if current_user.admin? %>
+  <section class="card"><h2>Pão aprovado nesta semana</h2><p class="bread-total"><%= @runs.sum(&:total_bread) %> pães</p><p>As entregas canceladas e os pedidos por aprovar não entram no total.</p></section>
+<% else %>
+  <p class="field-hint">Os totais de cada dia incluem apenas pão aprovado, sem entregas canceladas.</p>
+<% end %>
 <% (@week..@week.end_of_week).each do |date| %>
   <% runs = @runs.select { |run| run.delivery_date == date } %>
   <section class="plan-day">
-    <h2><%= delivery_date_label(date) %></h2>
+    <div class="plan-day-heading">
+      <h2><%= day_name(date.strftime('%A').downcase) %> <span class="plan-day-date"><%= date.strftime('%d/%m') %></span></h2>
+      <span class="daily-bread-total" aria-label="<%= runs.sum(&:total_bread) %> pães aprovados neste dia"><%= runs.sum(&:total_bread) %> pães</span>
+    </div>
     <% if runs.empty? %><p>Sem rotas marcadas para este dia.</p><% end %>
     <div class="planning-grid">
       <% runs.each do |run| %>
