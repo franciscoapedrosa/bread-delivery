@@ -26,7 +26,11 @@
     <main class="site-shell">
       <% if user_signed_in? %>
         <nav class="top-nav" aria-label="Navegação principal">
-          <%= link_to "Voltar ao início", authenticated_root_path, class: "btn-back" %>
+          <% if controller_name == "routes" && action_name == "show" %>
+            <%= link_to "Voltar às rotas", routes_path, class: "btn-back" %>
+          <% else %>
+            <%= link_to "Voltar ao início", authenticated_root_path, class: "btn-back" %>
+          <% end %>
         </nav>
       <% end %>
 

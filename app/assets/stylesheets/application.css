@@ -353,6 +353,10 @@ button, input[type="submit"], .btn, .btn-back { min-height: 44px; }
 .stop-body h3 { font-size: 1.3rem; margin: .5rem 0; }
 .stop-body p { margin: .6rem 0; }
 .order-input { max-width: 6rem; }
+.route-title-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.route-title-row h1 { min-width: 0; margin: .5rem 0; }
+.route-rename-link { flex-shrink: 0; display: inline-flex; align-items: center; min-height: 44px; padding: .35rem 0; font-size: .9rem; color: #4b5563; text-underline-offset: .2em; }
+.route-rename-link:hover { color: #1d4ed8; }
 .vehicle-photo { width: 100%; max-height: 360px; object-fit: contain; border-radius: 10px; background: #f0f3f6; }
 .vehicle-placeholder { display: grid; place-content: center; min-height: 180px; background: #f0f3f6; border-radius: 10px; font-size: 3rem; text-align: center; }
 .vehicle-placeholder span { font-size: 1rem; }

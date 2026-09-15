@@ -1,7 +1,8 @@
-<h1><%= @route.name %></h1>
+<div class="route-title-row">
+  <h1><%= @route.name %></h1>
+  <%= link_to "Alterar nome", edit_route_path(@route), class: "route-rename-link" %>
+</div>
 <div class="plan-actions">
-  <%= link_to "Voltar às rotas", routes_path, class: "btn" %>
-  <%= link_to "Alterar nome", edit_route_path(@route), class: "btn" %>
   <%= link_to "Marcar dia de entrega", new_route_run_path(route_id: @route.id), class: "btn btn-primary" %>
 </div>
 <h2>Percurso · ordem dos clientes</h2>
