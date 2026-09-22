@@ -6,6 +6,42 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  postgres_security:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-test-only
+          POSTGRES_DB: bread_security_test
+        ports:
+          - 5432:5432
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      RAILS_ENV: test
+      TEST_DATABASE_URL: postgresql://postgres:ci-test-only@127.0.0.1:5432/bread_security_test
+      DATABASE_APP_ROLE: bread_app
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev postgresql-client
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Create restricted test role and install schema/policies
+        run: |
+          psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE bread_app LOGIN PASSWORD 'ci-app-test-only' NOSUPERUSER NOBYPASSRLS NOINHERIT;"
+          bin/rails db:migrate
+          bin/rails security:install_rls
+      - name: Verify real PostgreSQL row isolation and authentication
+        run: bin/rails test test/models/row_security_test.rb test/controllers/postgresql_authentication_test.rb
+      - name: Verify RLS survives a schema restore with existing helper functions
+        run: |
+          SCHEMA=db/schema.rb bin/rails db:schema:load
+          bin/rails test test/models/row_security_test.rb test/controllers/postgresql_authentication_test.rb
+
   scan_ruby:
     runs-on: ubuntu-latest
 

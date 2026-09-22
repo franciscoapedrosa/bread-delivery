@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "dotenv"
+require "pg"
+require "uri"
+
+EXPECTED_HOST = "ep-silent-butterfly-za3t0sy6.c-2.eu-west-2.aws.neon.tech"
+REQUIRED_MIGRATIONS = Dir[File.expand_path("../db/migrate/*.rb", __dir__)].map { |path| File.basename(path).split("_").first }.freeze
+
+url = Dotenv.parse(File.expand_path("../.env.security-staging", __dir__)).fetch("STAGING_DATABASE_URL", "").strip
+abort "STAGING_DATABASE_URL vazia" if url.empty?
+
+uri = URI.parse(url)
+abort "Host incorreto: use apenas a branch security-test-2026-09-22" unless uri.host == EXPECTED_HOST
+abort "Base de dados incorreta" unless uri.path == "/neondb"
+abort "Utilizador incorreto" unless uri.user == "neondb_owner"
+
+connection = PG.connect(url)
+begin
+info = connection.exec(<<~SQL).first
+  SELECT current_database() AS database,
+         current_user AS username,
+         current_setting('server_version_num') AS version,
+         pg_is_in_recovery() AS recovery
+SQL
+
+abort "A ligação não corresponde ao destino esperado" unless
+  info["database"] == "neondb" &&
+  info["username"] == "neondb_owner" &&
+  info["version"].to_i >= 180_000 &&
+  info["recovery"] == "f"
+
+migrations = connection.exec("SELECT version FROM schema_migrations ORDER BY version").map { |row| row["version"] }
+rls_tables = connection.exec(<<~SQL).first["count"]
+  SELECT count(*)
+  FROM pg_class c
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public' AND c.relrowsecurity
+SQL
+
+puts "Destino validado: branch de testes / neondb / PostgreSQL #{info['version'].to_i / 10_000}"
+puts "Migrações atuais: #{migrations.size}; pendentes desta versão: #{(REQUIRED_MIGRATIONS - migrations).size}"
+puts "RLS atual: #{rls_tables} tabelas"
+ensure
+  connection&.close
+end

@@ -1,6 +1,7 @@
 <%= render "shared/error_messages", object: @route, title: "Não foi possível guardar a rota:" %>
 
 <%= form_with(model: @route, local: true) do |form| %>
+  <%= hidden_field_tag :origin, @edit_origin if @route.persisted? %>
   <p>
     <%= form.label :name, "Nome" %><br>
     <%= form.text_field :name %>

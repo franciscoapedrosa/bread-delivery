@@ -1,6 +1,7 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: %i[show edit update destroy deactivate activate]
   before_action :require_admin!, except: :my_customers
+  before_action :set_customer, only: %i[show edit update destroy deactivate activate]
+  before_action :set_edit_origin, only: %i[edit update]
 
   def my_customers
     unless current_user.distributor?
@@ -16,11 +17,13 @@ class CustomersController < ApplicationController
   end
 
   def index
-    @active_customers   = Customer.active.order(:name)
-    @inactive_customers = Customer.where(active: false).order(:name)
+    @customers = Customer.all.sort_by { |customer| [ customer.active? ? 0 : 1, customer.name.downcase ] }
   end
 
   def show
+    @routes = @customer.routes.order(:name)
+    @upcoming_stops = @customer.scheduled_stops.includes(route_run: :route).joins(:route_run)
+      .where(route_runs: { delivery_date: Date.current.., removed: false }).order("route_runs.delivery_date")
   end
 
   def new
@@ -41,13 +44,17 @@ class CustomersController < ApplicationController
 
   def update
     if @customer.update(customer_params)
-      redirect_to @customer, notice: "Cliente atualizado com sucesso."
+      redirect_to @edit_route.present? ? @edit_back_path : @customer, notice: "Cliente atualizado com sucesso."
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
+    if @customer.active? || @customer.scheduled_stops.exists? || @customer.user.present?
+      redirect_to @customer, alert: "Só é possível eliminar clientes inativos, sem conta associada e sem pedidos ou entregas agendadas."
+      return
+    end
     if @customer.destroy
       redirect_to customers_path, notice: "Cliente eliminado permanentemente."
     else
@@ -72,6 +79,17 @@ class CustomersController < ApplicationController
   end
 
   private
+
+  def set_edit_origin
+    @edit_route = @customer.routes.find_by(id: params[:route_id]) if params[:origin] == "route"
+    if @edit_route
+      @edit_origin = "route"
+      @edit_back_path = route_path(@edit_route, anchor: "route-stop-#{@customer.route_stops.find_by(route: @edit_route).id}")
+      return
+    end
+    @edit_origin = params[:origin] == "customer" ? "customer" : "list"
+    @edit_back_path = @edit_origin == "customer" ? customer_path(@customer) : customers_path
+  end
 
   def set_customer
     @customer = Customer.find(params[:id])

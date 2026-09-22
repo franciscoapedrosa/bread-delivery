@@ -9,7 +9,16 @@
 
     <div class="field">
       <%= form.label :password, "Palavra-passe" %><br>
-      <%= form.password_field :password, autocomplete: "current-password" %>
+      <div class="password-visibility" data-controller="password-visibility" data-action="turbo:before-cache@document->password-visibility#hide">
+        <%= form.password_field :password, autocomplete: "current-password", data: { password_visibility_target: "input" } %>
+        <button type="button" class="password-visibility-toggle" aria-label="Mostrar palavra-passe" aria-pressed="false" aria-controls="<%= form.field_id(:password) %>" data-password-visibility-target="button" data-action="password-visibility#toggle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
+            <circle cx="12" cy="12" r="3"/>
+            <path d="m3 3 18 18" data-password-visibility-target="slash" hidden/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <% if devise_mapping.rememberable? %>
@@ -24,5 +33,9 @@
     </div>
   <% end %>
 
-  <%= link_to "Esqueceu-se da palavra-passe?", new_password_path(resource_name) if devise_mapping.recoverable? %>
+  <p class="field-hint">Para recuperar a palavra-passe, contacte o administrador.</p>
+  <div class="login-contact-actions">
+    <%= link_to "📞 Ligar ao administrador", "tel:+351917281389", class: "btn btn-secondary" %>
+    <%= link_to "💬 Enviar SMS", "sms:+351917281389", class: "btn btn-secondary" %>
+  </div>
 </div>

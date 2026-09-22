@@ -26,16 +26,41 @@
     <main class="site-shell">
       <% if user_signed_in? %>
         <nav class="top-nav" aria-label="Navegação principal">
-          <% if controller_name == "routes" && action_name == "show" %>
+          <% if controller_name == "users" && %w[new create edit update].include?(action_name) %>
+            <%= link_to "Voltar", @user_back_path, class: "btn-back" %>
+          <% elsif controller_name == "scheduled_stops" && action_name == "index" && params[:origin] == "customers" && current_user.admin? %>
+            <%= link_to "Voltar", customers_path, class: "btn-back" %>
+          <% elsif controller_name == "weekly_routes" %>
+            <%= link_to "Voltar", route_runs_path, class: "btn-back" %>
+          <% elsif controller_name == "scheduled_stops" && action_name == "index" && @history %>
+            <%= link_to "Voltar", @history_back_path, class: "btn-back" %>
+          <% elsif controller_name == "routes" && action_name == "show" %>
             <%= link_to "Voltar às rotas", routes_path, class: "btn-back" %>
+          <% elsif controller_name == "routes" && %w[edit update].include?(action_name) %>
+            <%= link_to "Voltar", @edit_back_path, class: "btn-back" %>
+          <% elsif controller_name == "customers" && action_name == "show" %>
+            <%= link_to "Voltar", customers_path, class: "btn-back" %>
+          <% elsif controller_name == "customers" && %w[edit update].include?(action_name) %>
+            <%= link_to "Voltar", @edit_back_path, class: "btn-back" %>
+          <% elsif controller_name == "route_runs" && %w[show update].include?(action_name) %>
+            <%= link_to "Voltar", @route_runs_back_path, class: "btn-back" %>
           <% else %>
             <%= link_to "Voltar ao início", authenticated_root_path, class: "btn-back" %>
           <% end %>
         </nav>
       <% end %>
 
-      <% flash.each do |type, message| %>
-        <div class="flash <%= type %>" role="status"><%= message %></div>
+      <% if flash.any? %>
+        <div class="flash-toasts" aria-live="polite">
+          <% flash.each do |type, message| %>
+            <div class="flash flash-toast <%= type %>"
+                 role="<%= type.to_s == 'alert' ? 'alert' : 'status' %>"
+                 data-controller="toast">
+              <span><%= message %></span>
+              <button type="button" class="flash-close" aria-label="Fechar mensagem" data-action="toast#close">×</button>
+            </div>
+          <% end %>
+        </div>
       <% end %>
 
       <%= yield %>

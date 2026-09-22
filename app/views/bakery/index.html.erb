@@ -2,13 +2,21 @@
 <section class="card production-highlight">
   <h2>Para amanhã · <%= Date.tomorrow.strftime('%d/%m/%Y') %></h2>
   <p class="bread-total"><%= @tomorrow_total %> pães</p>
+  <ul class="production-customers">
+    <% @tomorrow_customers.each do |(_id, name), quantity| %>
+      <li><strong><%= quantity %> pães</strong> — <%= name %></li>
+    <% end %>
+  </ul>
   <p>Quantidade aprovada pelo administrador, somando todas as rotas de amanhã.</p>
 </section>
-<div class="plan-actions">
+<div class="plan-actions week-navigation" aria-label="Escolher semana">
   <%= link_to "← Semana anterior", bakery_path(week: @week - 7), class: "btn" %>
-  <strong><%= @week.strftime('%d/%m/%Y') %> a <%= @week.end_of_week.strftime('%d/%m/%Y') %></strong>
+  <strong class="week-range">
+    <span class="week-range-full"><%= @week.strftime('%d/%m/%Y') %> a <%= @week.end_of_week.strftime('%d/%m/%Y') %></span>
+    <span class="week-range-short"><%= @week.strftime('%d/%m') %> a <%= @week.end_of_week.strftime('%d/%m') %></span>
+  </strong>
   <%= link_to "Semana seguinte →", bakery_path(week: @week + 7), class: "btn" %>
-  <%= link_to "Esta semana", bakery_path, class: "btn" %>
+  <%= link_to "Esta semana", bakery_path, class: "btn week-current-link" %>
 </div>
 <p class="bread-total">Total da semana: <%= @totals.values.sum %> pães</p>
 <p>Os totais incluem apenas pedidos aprovados. Entregas canceladas não entram na contagem. Atualize a página para consultar as últimas aprovações.</p>
@@ -17,6 +25,12 @@
     <article class="card">
       <h2><%= delivery_date_label(date) %></h2>
       <p class="bread-total"><%= @totals.fetch(date, 0) %> pães</p>
+      <ul class="production-customers">
+        <% @daily_customers.each do |(delivery_date, _id, name), quantity| %>
+          <% next unless delivery_date == date %>
+          <li><strong><%= quantity %> pães</strong> — <%= name %></li>
+        <% end %>
+      </ul>
       <% if @waiting.fetch(date, 0).positive? %>
         <p class="state-pill state-pending"><%= @waiting[date] %> pedidos por submeter ou aprovar</p>
         <p>Esta quantidade ainda pode aumentar.</p>

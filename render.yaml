@@ -7,7 +7,7 @@ services:
     buildCommand: bin/render-build.sh
     startCommand: bin/rails server -b 0.0.0.0
     healthCheckPath: /up
-    autoDeployTrigger: commit
+    autoDeployTrigger: "off"
     envVars:
       - key: DATABASE_URL
         sync: false

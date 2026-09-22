@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "home/index"
 
-  devise_for :users, skip: [ :registrations ]
+  devise_for :users, skip: [ :registrations ], controllers: { sessions: "users/sessions", passwords: "users/passwords" }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :users
@@ -17,7 +17,8 @@ Rails.application.routes.draw do
   end
 
 
-  resources :route_runs, only: %i[index new create show update]
+  resources :route_runs, only: %i[index new create show update destroy]
+  resources :weekly_routes, only: %i[new create edit update]
   resources :scheduled_stops, only: %i[index update] do
     member do
       patch :approve

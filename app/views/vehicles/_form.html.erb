@@ -2,7 +2,7 @@
 <%= form_with model: @vehicle, class: "card" do |f| %>
   <p><%= f.label :name, "Nome do veículo" %><%= f.text_field :name, required: true, placeholder: "Ex.: Carrinha branca" %></p>
   <p><%= f.label :registration, "Matrícula" %><%= f.text_field :registration, required: true, placeholder: "Ex.: AA-00-BB" %></p>
-  <p><%= f.label :distributor_id, "Atribuir ao distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor").order(:email), :id, :email, include_blank: "Sem distribuidor atribuído" %></p>
+<p><%= f.label :distributor_id, "Atribuir ao distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor").sort_by(&:email), :id, :email, include_blank: "Sem distribuidor atribuído" %></p>
   <p><%= f.label :photo, "Fotografia" %><%= f.file_field :photo, accept: "image/jpeg,image/png,image/webp" %></p>
   <p>JPEG, PNG ou WebP, até 2 MB. Deixe em branco para manter a fotografia atual.</p>
   <%= f.submit "Guardar veículo", class: "btn btn-primary" %>

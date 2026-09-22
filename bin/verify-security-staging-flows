@@ -1,0 +1,111 @@
+#!/usr/bin/env ruby
+ENV["RAILS_LOG_LEVEL"] = "fatal"
+load File.expand_path("verify-security-staging", __dir__)
+require "securerandom"
+require "nokogiri"
+
+def browser
+  session = ActionDispatch::Integration::Session.new(Rails.application)
+  session.host! "bread-delivery-6lfk.onrender.com"
+  session.https!
+  session
+end
+
+def csrf(session, path)
+  session.get path
+  check(session.response.status == 200, "GET #{path.split('?').first}")
+  document = Nokogiri::HTML(session.response.body)
+  document.at_css('meta[name="csrf-token"]')&.[]("content") || document.at_css('input[name="authenticity_token"]')&.[]("value") || raise("Token CSRF ausente")
+end
+
+def login(session, email, password)
+  token = csrf(session, "/users/sign_in")
+  session.post "/users/sign_in", params: { authenticity_token: token, user: { email: email, password: password } }
+  check(session.response.redirect?, "login autenticado")
+  session.get "/"
+  check(session.response.status == 200, "página autenticada")
+end
+
+ActiveRecord::Base.transaction do
+  password = SecureRandom.hex(24)
+  suffix = SecureRandom.hex(8)
+  admin = distributor = client = stop = run = baker = nil
+  DatabaseAccess.with_context(role: "system") do
+    admin = User.create!(email: "admin-#{suffix}@example.invalid", password: password, role: "admin")
+    distributor = User.create!(email: "driver-#{suffix}@example.invalid", password: password, role: "distributor")
+    baker = User.find_by(role: "baker") || User.new(email: "baker-#{suffix}@example.invalid", role: "baker")
+    baker.password = password
+    baker.save!
+    client = User.create!(email: "client-#{suffix}@example.invalid", password: password, role: "customer", customer_attributes: { name: "Ensaio #{suffix}", address: "Morada de ensaio", bread_quantity: 1, active: true })
+    route = Route.create!(name: "Ensaio #{suffix}")
+    route.route_stops.create!(customer: client.customer, position: 1)
+    run = RouteRun.create!(route: route, distributor: distributor, delivery_date: Date.tomorrow)
+    stop = run.scheduled_stops.first!
+    stop.update!(requested_quantity: 8, approval_status: "pending")
+  end
+  customer_browser = browser
+  login(customer_browser, client.email, password)
+  customer_browser.get "/scheduled_stops"
+  check(customer_browser.response.status == 200 && customer_browser.response.body.include?("Morada de ensaio"), "cliente vê a própria entrega")
+  customer_browser.get "/users", headers: { "Accept" => "application/json" }
+  check(customer_browser.response.status == 403, "cliente sem acesso a utilizadores")
+  DatabaseAccess.with_context(role: "customer", user_id: client.id) do
+    check(Customer.pluck(:id) == [ client.customer.id ], "RLS isola o cliente")
+  end
+  admin_browser = browser
+  login(admin_browser, admin.email, password)
+  token = csrf(admin_browser, "/scheduled_stops")
+  admin_browser.patch "/scheduled_stops/#{stop.id}/approve", params: { authenticity_token: token, requested_quantity: 8 }
+  check(admin_browser.response.redirect?, "aprovação pelo administrador")
+  driver_browser = browser
+  login(driver_browser, distributor.email, password)
+  token = csrf(driver_browser, "/route_runs/#{run.id}")
+  driver_browser.patch "/scheduled_stops/#{stop.id}", params: { authenticity_token: token, scheduled_stop: { status: "delivered" } }
+  check(driver_browser.response.redirect?, "distribuidor atualiza entrega")
+  DatabaseAccess.with_context(role: "distributor", user_id: distributor.id) do
+    check(stop.reload.status == "delivered" && stop.approved_quantity == 8, "aprovação e entrega persistidas na transação")
+  end
+  check(User.count.zero?, "contexto das sessões não contamina ligação")
+  baker_browser = browser
+  login(baker_browser, baker.email, password)
+  baker_browser.get "/bakery"
+  check(baker_browser.response.status == 200, "padeiro consulta produção")
+  baker_browser.get "/users", headers: { "Accept" => "application/json" }
+  check(baker_browser.response.status == 403, "padeiro sem acesso a utilizadores")
+
+  locked_browser = browser
+  token = csrf(locked_browser, "/users/sign_in")
+  5.times do
+    locked_browser.post "/users/sign_in", params: { authenticity_token: token, user: { email: distributor.email, password: "incorrect-password" } }
+  end
+  DatabaseAccess.with_context(role: "auth") do
+    check(distributor.reload.access_locked?, "conta bloqueada após cinco tentativas erradas")
+  end
+
+  # Test delivery stores mail only in memory; never uses SMTP.
+  ActionMailer::Base.perform_deliveries = true
+  recovery_browser = browser
+  token = csrf(recovery_browser, "/users/password/new")
+  recovery_browser.post "/users/password", params: { authenticity_token: token, user: { email: client.email } }
+  check(recovery_browser.response.redirect? && ActionMailer::Base.deliveries.any?, "recuperação gera email apenas em memória")
+  message = ActionMailer::Base.deliveries.last
+  reset_token = message.body.decoded[/reset_password_token=([^"&\s<]+)/, 1]
+  check(reset_token.present?, "email contém token de recuperação")
+  token = csrf(recovery_browser, "/users/password/edit?reset_password_token=#{reset_token}")
+  new_password = SecureRandom.hex(24)
+  recovery_browser.put "/users/password", params: { authenticity_token: token, user: { reset_password_token: reset_token, password: new_password, password_confirmation: new_password } }
+  DatabaseAccess.with_context(role: "auth") do
+    check(client.reload.valid_password?(new_password), "recuperação altera password com token válido")
+  end
+  ActionMailer::Base.perform_deliveries = false
+
+  limited_browser = browser
+  token = csrf(limited_browser, "/users/sign_in")
+  21.times do
+    limited_browser.post "/users/sign_in", params: { authenticity_token: token, user: { email: "missing-#{suffix}@example.invalid", password: "incorrect-password" } }
+    break if limited_browser.response.status == 429
+  end
+  check(limited_browser.response.status == 429 && limited_browser.response.headers["Retry-After"] == "900", "rate limit HTTP limita tentativas por IP")
+  raise ActiveRecord::Rollback
+end
+puts "OK: ensaio revertido; contas e entregas sintéticas não foram guardadas."

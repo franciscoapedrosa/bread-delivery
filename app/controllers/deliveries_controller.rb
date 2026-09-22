@@ -102,7 +102,7 @@ end
   private
 
   def deny_customer
-    redirect_to scheduled_stops_path, alert: "Consulte os seus pedidos de pão." if current_user.customer?
+    deny_access! unless current_user.admin? || current_user.distributor?
   end
 
   def set_delivery

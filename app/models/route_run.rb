@@ -2,7 +2,8 @@ class RouteRun < ApplicationRecord
   belongs_to :route
   belongs_to :distributor, class_name: "User"
   has_many :scheduled_stops, dependent: :destroy
-  validates :delivery_date, presence: true, uniqueness: { scope: :route_id }
+  validates :delivery_date, presence: true
+  validates :delivery_date, uniqueness: { scope: :route_id, conditions: -> { where(removed: false) } }, unless: :removed?
   validates :position, numericality: { only_integer: true, greater_than: 0 }
   validate :valid_distributor
   validate :future_date, on: :create

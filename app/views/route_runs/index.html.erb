@@ -1,41 +1,60 @@
-<h1><%= current_user.admin? ? "Entregas da semana" : "As minhas rotas" %></h1>
-<div class="plan-actions">
+<header class="agenda-sticky-header">
+<h1><%= current_user.admin? ? "Agenda semanal" : "As minhas rotas" %></h1>
+<div class="plan-actions week-navigation" aria-label="Escolher semana">
   <%= link_to "← Semana anterior", route_runs_path(week: @week - 7), class: "btn" %>
-  <strong><%= @week.strftime('%d/%m/%Y') %> a <%= @week.end_of_week.strftime('%d/%m/%Y') %></strong>
+  <strong class="week-range">
+    <span class="week-range-full"><%= @week.strftime('%d/%m/%Y') %> a <%= @week.end_of_week.strftime('%d/%m/%Y') %></span>
+    <span class="week-range-short"><%= @week.strftime('%d/%m') %> a <%= @week.end_of_week.strftime('%d/%m') %></span>
+  </strong>
   <%= link_to "Semana seguinte →", route_runs_path(week: @week + 7), class: "btn" %>
 </div>
 <% if current_user.admin? %>
   <div class="plan-actions">
-    <%= link_to "Marcar dia de entrega", new_route_run_path, class: "btn btn-primary" %>
-    <%= link_to "Aprovar pedidos de pão", scheduled_stops_path, class: "btn" %>
-    <%= link_to "Organizar rotas e clientes", routes_path, class: "btn" %>
+    <%= link_to "Adicionar rota à agenda", new_weekly_route_path, class: "btn btn-primary" %>
+    <%= link_to "Entregas anteriores", scheduled_stops_path(history: "1", origin: "route_runs", week: @week.iso8601), class: "btn" %>
   </div>
 <% end %>
-<% if current_user.admin? %>
-  <section class="card"><h2>Pão aprovado nesta semana</h2><p class="bread-total"><%= @runs.sum(&:total_bread) %> pães</p><p>As entregas canceladas e os pedidos por aprovar não entram no total.</p></section>
-<% else %>
+<% unless current_user.admin? %>
   <p class="field-hint">Os totais de cada dia incluem apenas pão aprovado, sem entregas canceladas.</p>
 <% end %>
+</header>
 <% (@week..@week.end_of_week).each do |date| %>
+  <% next if current_user.admin? && date < Date.current %>
   <% runs = @runs.select { |run| run.delivery_date == date } %>
-  <section class="plan-day">
+  <section class="plan-day agenda-day <%= 'agenda-day-today' if date == Date.current %>"
+           <% if current_user.distributor? && date == Date.current %>data-controller="today-focus"<% end %>>
     <div class="plan-day-heading">
-      <h2><%= day_name(date.strftime('%A').downcase) %> <span class="plan-day-date"><%= date.strftime('%d/%m') %></span></h2>
+      <h2><% if relative_delivery_day(date) %><%= relative_delivery_day(date) %> · <% end %><%= day_name(date.strftime('%A').downcase) %> <span class="plan-day-date"><%= date.strftime('%d/%m') %></span></h2>
       <span class="daily-bread-total" aria-label="<%= runs.sum(&:total_bread) %> pães aprovados neste dia"><%= runs.sum(&:total_bread) %> pães</span>
     </div>
     <% if runs.empty? %><p>Sem rotas marcadas para este dia.</p><% end %>
     <div class="planning-grid">
       <% runs.each do |run| %>
-        <article class="card">
-          <p>Rota <%= run.position %> do dia · <%= run.distributor.email %></p>
+        <article class="card route-run-card">
+          <% if current_user.admin? %>
+            <div data-controller="route-removal">
+              <button type="button" class="route-remove-button" aria-label="Remover <%= run.route.name %> de <%= run.delivery_date.strftime('%d/%m/%Y') %>" data-action="route-removal#open">×</button>
+              <dialog class="route-removal-dialog" data-route-removal-target="dialog" aria-labelledby="remove-title-<%= run.id %>">
+                <h2 id="remove-title-<%= run.id %>">Remover <%= run.route.name %>?</h2>
+                <p>Escolha se pretende remover apenas a entrega de <strong><%= run.delivery_date.strftime('%d/%m/%Y') %></strong> ou todas as entregas atuais e futuras desta rota.</p>
+                <p>Os pedidos pendentes ou aprovados dessas entregas serão cancelados. O histórico é preservado.</p>
+                <div class="route-removal-actions">
+                  <%= button_to "Só esta entrega", route_run_path(run), method: :delete, params: { scope: "one", week: @week.iso8601 }, class: "btn btn-danger" %>
+                  <%= button_to "Todas — parar repetição semanal", route_run_path(run), method: :delete, params: { scope: "all", week: @week.iso8601 }, class: "btn btn-danger" %>
+                  <button type="button" class="btn btn-secondary" data-action="route-removal#close">Manter rota</button>
+                </div>
+              </dialog>
+            </div>
+          <% end %>
+          <p class="route-distributor"><strong>Distribuidor:</strong> <%= run.distributor.email %></p>
           <h3><%= run.route.name %></h3>
-          <p><strong><%= run.total_bread %> pães aprovados</strong> · <%= run.scheduled_stops.size %> locais</p>
-          <div class="plan-actions">
+          <p class="route-run-summary"><strong><%= run.total_bread %> pães aprovados</strong> · <%= run.scheduled_stops.size %> locais</p>
+          <div class="route-statuses">
             <% %w[pending delivered cancelled].each do |status| %>
               <span class="state-pill state-<%= status %>"><%= run.scheduled_stops.count { |s| s.status == status } %> · <%= delivery_status(status) %></span>
             <% end %>
           </div>
-          <%= link_to "Abrir percurso", run, class: "btn btn-primary" %>
+          <%= link_to "Abrir percurso", route_run_path(run, week: @week.iso8601), class: "btn btn-secondary" %>
         </article>
       <% end %>
     </div>

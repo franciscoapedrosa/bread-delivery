@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+require_relative "../config/environment"
+require "tempfile"
+
+abort "Only the local SQLite development database may be backed up with this command" unless Rails.env.development? && ActiveRecord::Base.connection.adapter_name == "SQLite"
+target = Rails.root.join("storage/before-security-#{Time.now.utc.strftime('%Y%m%dT%H%M%SZ')}.sqlite3.enc")
+abort "Backup already exists" if target.exist?
+Tempfile.create(["bread-security-backup", ".sqlite3"]) do |snapshot|
+  database = ActiveRecord::Base.connection_db_config.database
+  abort "SQLite backup failed" unless system("sqlite3", database, ".backup '#{snapshot.path}'", out: File::NULL)
+  Rails.application.encrypted(target).write(File.binread(snapshot.path))
+end
+File.chmod(0o600, target)
+puts "Encrypted local backup saved to #{target}. Restore with the same RAILS_MASTER_KEY."

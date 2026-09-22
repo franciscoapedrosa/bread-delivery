@@ -4,7 +4,7 @@
 <%= form_with model: @run, class: "card" do |f| %>
   <p><%= f.label :route_id, "Rota" %><%= f.collection_select :route_id, Route.order(:name), :id, :name, { prompt: "Escolha a rota" }, required: true %></p>
   <p><%= f.label :delivery_date, "Data da entrega" %><%= f.date_field :delivery_date, min: Date.current, required: true %></p>
-  <p><%= f.label :distributor_id, "Distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor").order(:email), :id, :email, { prompt: "Escolha o distribuidor" }, required: true %></p>
+<p><%= f.label :distributor_id, "Distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor").sort_by(&:email), :id, :email, { prompt: "Escolha o distribuidor" }, required: true %></p>
   <p><%= f.label :position, "Ordem desta rota no dia do distribuidor" %><%= f.number_field :position, min: 1, required: true %></p>
   <p>Use 1 para a primeira rota do dia, 2 para a segunda, e assim por diante.</p>
   <%= f.submit "Marcar entrega", class: "btn btn-primary" %>

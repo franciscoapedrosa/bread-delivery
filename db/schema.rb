@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_20_010200) do
   create_table "customers", force: :cascade do |t|
     t.boolean "active", default: true, null: false
-    t.string "address"
+    t.text "address"
     t.integer "bread_quantity"
     t.datetime "created_at", null: false
-    t.string "name"
+    t.text "name"
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.index ["name", "address", "bread_quantity"], name: "index_customers_on_name_and_address_and_bread_quantity", unique: true
@@ -37,16 +37,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_130000) do
     t.index ["route_id"], name: "index_deliveries_on_route_id"
   end
 
+  create_table "login_throttles", force: :cascade do |t|
+    t.integer "attempts", default: 0, null: false
+    t.datetime "expires_at", null: false
+    t.string "key", null: false
+    t.index ["expires_at"], name: "index_login_throttles_on_expires_at"
+    t.index ["key"], name: "index_login_throttles_on_key", unique: true
+  end
+
   create_table "route_runs", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "delivery_date", null: false
     t.integer "distributor_id", null: false
     t.integer "position", default: 1, null: false
+    t.boolean "removed", default: false, null: false
     t.integer "route_id", null: false
     t.datetime "updated_at", null: false
+    t.integer "weekly_route_id"
     t.index ["distributor_id"], name: "index_route_runs_on_distributor_id"
-    t.index ["route_id", "delivery_date"], name: "index_route_runs_on_route_id_and_delivery_date", unique: true
+    t.index ["route_id", "delivery_date"], name: "index_active_route_runs_on_route_and_date", unique: true, where: "removed = FALSE"
     t.index ["route_id"], name: "index_route_runs_on_route_id"
+    t.index ["weekly_route_id"], name: "index_route_runs_on_weekly_route_id"
   end
 
   create_table "route_stops", force: :cascade do |t|
@@ -68,12 +79,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_130000) do
   end
 
   create_table "scheduled_stops", force: :cascade do |t|
-    t.string "address", null: false
+    t.text "address", null: false
     t.string "approval_status", default: "awaiting_request", null: false
     t.integer "approved_quantity"
     t.datetime "created_at", null: false
     t.integer "customer_id", null: false
     t.integer "position", null: false
+    t.text "rejection_reason"
     t.integer "requested_quantity"
     t.integer "route_run_id", null: false
     t.string "status", default: "pending", null: false
@@ -85,8 +97,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_130000) do
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.string "email", default: "", null: false
+    t.text "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.integer "failed_attempts", default: 0, null: false
+    t.datetime "locked_at"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
@@ -109,15 +123,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_130000) do
     t.index ["registration"], name: "index_vehicles_on_registration", unique: true
   end
 
+  create_table "weekly_routes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "days", null: false
+    t.integer "distributor_id", null: false
+    t.integer "position", default: 1, null: false
+    t.integer "route_id", null: false
+    t.date "starts_on", null: false
+    t.datetime "updated_at", null: false
+    t.index ["distributor_id"], name: "index_weekly_routes_on_distributor_id"
+    t.index ["route_id"], name: "index_weekly_routes_on_route_id", unique: true
+  end
+
   add_foreign_key "customers", "users"
   add_foreign_key "deliveries", "customers"
   add_foreign_key "deliveries", "routes"
   add_foreign_key "deliveries", "users", column: "distributor_id"
   add_foreign_key "route_runs", "routes"
   add_foreign_key "route_runs", "users", column: "distributor_id"
+  add_foreign_key "route_runs", "weekly_routes"
   add_foreign_key "route_stops", "customers"
   add_foreign_key "route_stops", "routes"
   add_foreign_key "scheduled_stops", "customers"
   add_foreign_key "scheduled_stops", "route_runs"
   add_foreign_key "vehicles", "users", column: "distributor_id"
+  add_foreign_key "weekly_routes", "routes"
+  add_foreign_key "weekly_routes", "users", column: "distributor_id"
 end

@@ -30,11 +30,16 @@
 
         <div class="card">
           <div class="card-icon">📦</div>
-          <h3 class="card-title">Entregas da Semana</h3>
+          <h3 class="card-title">Agenda semanal</h3>
           <p class="card-text">Acompanhe todas as entregas e os seus estados.</p>
           <%= link_to "Abrir", route_runs_path, class: "btn" %>
         </div>
-        <div class="card">
+        <div class="card bread-requests-card">
+          <% if @unsubmitted_bread_requests.positive? %>
+            <span class="request-status request-status-alert" aria-label="<%= @unsubmitted_bread_requests %> pedidos por submeter" title="Pedidos por submeter"><%= @unsubmitted_bread_requests %></span>
+          <% else %>
+            <span class="request-status request-status-ok" aria-label="Todos os pedidos foram submetidos" title="Todos os pedidos foram submetidos">✓</span>
+          <% end %>
           <div class="card-icon">🍞</div>
           <h3 class="card-title">Pedidos de pão</h3>
           <p class="card-text">Aprove as quantidades pedidas pelos clientes.</p>
@@ -62,8 +67,20 @@
     </section>
   <% elsif current_user.customer? %>
     <section class="card">
-      <h2>O meu pão</h2>
-      <p>Escolha a quantidade para os dias de entrega marcados. Envie o pedido até às 23h do dia anterior.</p>
+      <div class="customer-bread-heading">
+        <h2><span aria-hidden="true">🍞</span> O meu pão</h2>
+        <div class="request-decision-labels" aria-label="Dias por estado da quantidade de pão">
+          <% pending_days = @customer_request_day_counts.fetch("pending", 0) %>
+          <% rejected_days = @customer_request_day_counts.fetch("rejected", 0) %>
+          <% if pending_days.positive? %>
+            <span class="request-decision-label request-decision-pending"><%= pending_days %> por aprovar</span>
+          <% end %>
+          <% if rejected_days.positive? %>
+            <span class="request-decision-label request-decision-rejected"><%= rejected_days %> <%= rejected_days == 1 ? "Recusado" : "Recusados" %></span>
+          <% end %>
+        </div>
+      </div>
+      <p>Peça o pão para amanhã, se tiver entrega marcada. Envie o pedido até às 23h de hoje.</p>
       <%= link_to "Pedir pão e consultar pedidos", scheduled_stops_path, class: "btn btn-primary" %>
     </section>
   <% else %>
@@ -91,5 +108,5 @@
 
 
 <div class="logout">
-  <%= button_to "Terminar sessão", destroy_user_session_path, method: :delete, class: "btn btn-ghost" %>
+  <%= button_to "Terminar sessão", destroy_user_session_path, method: :delete, class: "btn btn-logout" %>
 </div>

@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: %i[show edit update destroy]
   before_action :require_admin!
+  before_action :set_user, only: %i[show edit update destroy]
+  before_action :set_form_origin, only: %i[new create edit update]
 
   def index
     @users = User.all
@@ -11,6 +12,11 @@ class UsersController < ApplicationController
 
   def new
     @user = User.new
+    @user.role = "customer" if @form_origin == "customers"
+    if params[:customer_id].present?
+      @existing_customer_id = Customer.where(user_id: nil).find(params[:customer_id]).id
+      @user.role = "customer"
+    end
     @user.build_customer(bread_quantity: 1)
   end
 
@@ -56,10 +62,23 @@ class UsersController < ApplicationController
 
   private
 
+  def set_form_origin
+    @form_origin = "customers" if params[:origin] == "customers"
+    @origin_customer = Customer.find_by(id: params[:customer_id]) if params[:customer_id].present?
+    @user_back_path = if @origin_customer
+      customer_path(@origin_customer)
+    elsif @form_origin == "customers"
+      customers_path
+    else
+      users_path
+    end
+  end
+
   def assign_customer_profile
     return unless @user.customer?
 
     existing_id = params.require(:user)[:existing_customer_id]
+    @existing_customer_id = existing_id
     if @user.new_record? && existing_id.present?
       @user.customer = Customer.where(user_id: nil).find(existing_id)
     else

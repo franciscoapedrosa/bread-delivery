@@ -1,59 +1,61 @@
-<h1>Clientes</h1>
+<div data-controller="customer-search">
+<div class="page-heading-row">
+  <div>
+    <h1>Clientes</h1>
+    <p class="subtitle">Consulte e ative ou desative clientes.</p>
+  </div>
+  <div class="plan-actions">
+    <%= link_to "Criar conta de cliente", new_user_path(origin: "customers"), class: "btn btn-primary" %>
+    <%= link_to "Pedidos de pão", scheduled_stops_path(origin: "customers"), class: "btn" %>
+  </div>
+</div>
 
-<%= link_to "Criar conta de cliente", new_user_path, class: "btn btn-primary" %>
-<%= link_to "Aprovar pedidos de pão", scheduled_stops_path, class: "btn" %>
+<div class="customer-search-field">
+  <label for="customer-search">Pesquisar clientes</label>
+  <input type="search" id="customer-search" placeholder="Escreva o nome do cliente…" autocomplete="off" data-customer-search-target="input" data-action="input->customer-search#filter" aria-controls="customers-list">
+</div>
+<p hidden role="status" data-customer-search-target="empty">Não foram encontrados clientes com esse nome.</p>
 
-<h2>Clientes ativos</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Morada</th>
-      <th>Pão aprovado esta semana</th>
-      <th>Estado</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @active_customers.each do |customer| %>
-      <tr>
-        <td><%= link_to customer.name, customer_path(customer) %></td>
-        <td><%= customer.address %></td>
-        <td><%= customer.scheduled_stops.joins(:route_run).where(route_runs: { delivery_date: Date.current.all_week }).where.not(status: "cancelled").sum(:approved_quantity) %></td>
-        <td>Ativo</td>
-        <td>
-          <div class="table-actions">
-            <%= link_to "Editar", edit_customer_path(customer), class: "btn btn-small" %>
-            <%= button_to "Desativar", deactivate_customer_path(customer), method: :patch, class: "btn btn-small btn-danger", form_class: "inline-form", data: { turbo_confirm: "Tem a certeza de que pretende desativar este cliente?" } %>
-          </div>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<h2>Clientes inativos</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Morada</th>
-      <th>Quantidade de pão</th>
-      <th>Estado</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @inactive_customers.each do |customer| %>
-      <tr>
-        <td><%= link_to customer.name, customer_path(customer) %></td>
-        <td><%= customer.address %></td>
-        <td><%= customer.bread_quantity %></td>
-        <td>Inativo</td>
-        <td>
-        <%= button_to "Reativar", activate_customer_path(customer), method: :patch, class: "btn btn-small", data: { turbo_confirm: "Tem a certeza de que pretende reativar este cliente?" } %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<% if @customers.empty? %>
+  <section class="card empty-state">
+    <h2>Ainda não existem clientes</h2>
+    <p>Comece por criar uma conta de cliente.</p>
+  </section>
+<% else %>
+  <div id="customers-list" data-customer-search-target="list">
+  <% [true, false].each do |active| %>
+    <% customers = @customers.select { |customer| customer.active? == active } %>
+    <section class="detail-section" data-customer-search-target="group">
+      <h2><%= active ? "Clientes ativos" : "Clientes inativos" %></h2>
+      <% if customers.empty? %>
+        <p class="empty-note">Não há clientes <%= active ? "ativos" : "inativos" %>.</p>
+      <% else %>
+  <div class="management-table-wrap">
+    <table class="management-table customers-management-table">
+      <thead><tr><th>Nome</th><th>Estado</th><th>Ações</th></tr></thead>
+      <tbody>
+        <% customers.each do |customer| %>
+          <tr data-customer-search-target="customer" data-customer-name="<%= customer.name %>">
+            <td data-label="Nome"><span class="customer-name"><%= customer.name %></span></td>
+            <td data-label="Estado"><span class="state-pill <%= customer.active? ? 'state-delivered' : 'state-cancelled' %>"><%= customer.active? ? "Ativo" : "Inativo" %></span></td>
+            <td data-label="Ações">
+              <div class="table-actions">
+                <%= link_to "Ver detalhes", customer_path(customer), class: "btn btn-small btn-secondary" %>
+                <% if customer.active? %>
+                  <%= button_to "Desativar", deactivate_customer_path(customer), method: :patch, class: "btn btn-small btn-danger", form_class: "inline-form", data: { turbo_confirm: "Desativar #{customer.name}?" } %>
+                <% else %>
+                  <%= button_to "Reativar", activate_customer_path(customer), method: :patch, class: "btn btn-small", form_class: "inline-form", data: { turbo_confirm: "Reativar #{customer.name}?" } %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+      <% end %>
+    </section>
+  <% end %>
+  </div>
+<% end %>
+</div>

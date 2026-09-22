@@ -6,7 +6,7 @@ gem "rails", "~> 8.1.3"
 gem "propshaft"
 # Use SQLite locally and PostgreSQL on the hosted production service.
 gem "sqlite3", ">= 2.1", groups: %i[ development test ]
-gem "pg", "~> 1.5", group: :production
+gem "pg", "~> 1.5"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 8.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]

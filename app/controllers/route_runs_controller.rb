@@ -1,11 +1,19 @@
 class RouteRunsController < ApplicationController
-  before_action :require_admin!, only: %i[new create update]
-  before_action :set_run, only: %i[show update]
+  before_action :require_admin!, only: %i[new create update destroy]
+  before_action :set_run, only: %i[show update destroy]
+  before_action :set_back_path, only: %i[show update]
 
   def index
     @week = Date.iso8601(params[:week].presence || Date.current.to_s).beginning_of_week
-    @runs = visible_runs.where(delivery_date: @week..@week.end_of_week)
+    return deny_access! unless current_user.admin? || current_user.distributor?
+    if @week > (Date.current + 1.year).end_of_week
+      redirect_to route_runs_path, alert: "Consulte a agenda até um ano de antecedência."
+      return
+    end
+    DatabaseAccess.with_context(role: "system") { WeeklyRoute.materialize_through!(@week.end_of_week) }
+    @runs = visible_runs.where(removed: false, delivery_date: @week..@week.end_of_week)
       .includes(:route, :distributor, scheduled_stops: :customer).ordered
+    @runs = @runs.where(delivery_date: Date.current..) if current_user.admin?
   rescue Date::Error
     redirect_to route_runs_path, alert: "Data inválida."
   end
@@ -40,7 +48,44 @@ class RouteRunsController < ApplicationController
     end
   end
 
+  def destroy
+    if @run.delivery_date < Date.current || !%w[one all].include?(params[:scope])
+      redirect_to route_runs_path, alert: "Escolha uma entrega atual ou futura e a opção de remoção."
+      return
+    end
+    RouteRun.transaction do
+      if params[:scope] == "all"
+        schedule = WeeklyRoute.find_by(route_id: @run.route_id)
+        if schedule
+          schedule.lock!
+          RouteRun.where(weekly_route_id: schedule.id).update_all(weekly_route_id: nil)
+          schedule.destroy!
+        end
+        runs = RouteRun.where(route_id: @run.route_id, delivery_date: Date.current..)
+      else
+        runs = RouteRun.where(id: @run.id)
+      end
+      runs.find_each do |run|
+        run.with_lock do
+          run.update!(removed: true)
+          run.scheduled_stops.where(status: "pending").find_each { |stop| stop.update!(status: "cancelled") }
+        end
+      end
+    end
+    redirect_to route_runs_path(week: params[:week]), notice: params[:scope] == "all" ? "Rota removida da agenda e repetição semanal desativada." : "Entrega removida apenas nesta data."
+  rescue ActiveRecord::RecordInvalid => error
+    redirect_to route_runs_path(week: params[:week]), alert: "Não foi possível remover: #{error.record.errors.full_messages.to_sentence}"
+  end
+
   private
+
+  def set_back_path
+    @route_runs_back_path = if params[:origin] == "bread_requests" && current_user.admin?
+      scheduled_stops_path
+    else
+      route_runs_path(week: params[:week].presence || @run.delivery_date)
+    end
+  end
 
   def visible_runs
     return RouteRun.all if current_user.admin?

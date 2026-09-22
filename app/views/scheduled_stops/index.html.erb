@@ -1,27 +1,64 @@
-<h1><%= current_user.admin? ? "Aprovar pedidos de pão" : "O meu pão" %></h1>
-<p>Os pedidos podem ser alterados até às 23h do dia anterior à entrega, hora de Lisboa. Cada alteração precisa de nova aprovação.</p>
-<% if @stops.empty? %><div class="card"><p><%= current_user.admin? ? "Não há pedidos à espera de aprovação." : "Ainda não tem dias de entrega marcados. O administrador irá indicar os dias disponíveis." %></p></div><% end %>
+<h1><%= @history ? "Entregas anteriores" : current_user.admin? ? "Aprovar pedidos de pão" : "O meu pão" %></h1>
+<% if current_user.admin? && !@history %>
+  <section class="card">
+    <h2>Pão aprovado para amanhã</h2>
+    <p class="bread-total"><%= @tomorrow_approved_bread %> pães</p>
+    <p>As entregas canceladas e os pedidos por aprovar não entram no total.</p>
+  </section>
+<% end %>
+<% unless @history %>
+<p>Os pedidos são para amanhã e podem ser enviados ou alterados até às 23h de hoje, hora de Lisboa. Cada alteração precisa de nova aprovação.</p>
+<% end %>
+<% if current_user.admin? && !@history && @unsubmitted_customers.any? %>
+  <section class="card unsubmitted-customers" aria-labelledby="unsubmitted-customers-title">
+    <h2 id="unsubmitted-customers-title">Clientes por submeter quantidades de pão</h2>
+    <ul>
+      <% @unsubmitted_customers.each do |customer| %>
+        <li><%= customer.name %></li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+<% if @stops.empty? %><div class="card"><p><%= @history ? "Ainda não há entregas anteriores." : current_user.admin? ? "Não há pedidos à espera de aprovação." : "Ainda não tem dias de entrega marcados. O administrador irá indicar os dias disponíveis." %></p></div><% end %>
 <div class="planning-grid">
   <% @stops.each do |stop| %>
     <article class="card">
-      <h2><%= delivery_date_label(stop.route_run.delivery_date) %></h2>
+      <h2><% if current_user.customer? %>Para: <% end %><%= delivery_date_label(stop.route_run.delivery_date) %></h2>
       <% if current_user.admin? %><h3><%= stop.customer.name %></h3><% end %>
-      <p><%= stop.route_run.route.name %> · <%= stop.address %></p>
-      <span class="state-pill state-<%= stop.approval_status == 'approved' ? 'delivered' : stop.approval_status == 'rejected' ? 'cancelled' : 'pending' %>"><%= approval_name(stop.approval_status) %></span>
-      <p><strong><%= stop.requested_quantity.nil? ? "Pedido por submeter" : "Pedido: #{stop.requested_quantity} pães" %></strong></p>
+      <p><% if current_user.admin? %><%= stop.route_run.route.name %> · <% end %><%= stop.address %></p>
+      <p><strong>Quantidade de pão<%= ": #{stop.requested_quantity} pães" unless stop.requested_quantity.nil? %>:</strong>
+        <span class="state-pill state-<%= stop.approval_status == 'approved' ? 'delivered' : stop.approval_status == 'rejected' ? 'cancelled' : 'pending' %>"><%= stop.approval_status == "pending" ? "Por aprovar" : approval_name(stop.approval_status) %></span>
+      </p>
+      <% if current_user.customer? && stop.approval_status == "rejected" && stop.rejection_reason.present? %>
+        <div class="rejection-note">
+          <strong>Motivo da recusa</strong>
+          <p><%= stop.rejection_reason %></p>
+        </div>
+      <% end %>
       <p>Entrega: <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span></p>
       <p>Prazo: <strong><%= stop.route_run.cutoff.strftime('%d/%m/%Y às %H:%M') %></strong></p>
-      <% if current_user.admin? %>
+      <% if @history %>
+        <p><strong><%= bread_quantity_summary(stop) %></strong></p>
+      <% elsif current_user.admin? %>
         <div class="plan-actions">
-          <%= button_to "Aprovar #{stop.requested_quantity} pães", approve_scheduled_stop_path(stop), method: :patch, params: { requested_quantity: stop.requested_quantity }, class: "btn btn-primary" %>
-          <%= button_to "Recusar", reject_scheduled_stop_path(stop), method: :patch, params: { requested_quantity: stop.requested_quantity }, class: "btn btn-danger" %>
-          <%= link_to "Ver percurso", stop.route_run, class: "btn" %>
+          <%= button_to "Aprovar #{stop.requested_quantity} pães", approve_scheduled_stop_path(stop), method: :patch, params: { requested_quantity: stop.requested_quantity, origin: params[:origin] == "customers" ? "customers" : nil }, class: "btn btn-primary" %>
+          <%= link_to "Ver percurso", route_run_path(stop.route_run, origin: "bread_requests"), class: "btn" %>
         </div>
+        <%= form_with url: reject_scheduled_stop_path(stop), method: :patch, class: "rejection-form" do |form| %>
+          <%= hidden_field_tag :origin, "customers" if params[:origin] == "customers" %>
+          <%= hidden_field_tag :requested_quantity, stop.requested_quantity %>
+          <%= form.label :rejection_reason, "Motivo da recusa" %>
+          <%= form.text_area :rejection_reason, rows: 3, required: true, placeholder: "Explique ao cliente por que motivo o pedido foi recusado" %>
+          <%= form.submit "Recusar pedido", class: "btn btn-danger" %>
+        <% end %>
       <% elsif stop.open_for_request? %>
         <%= form_with model: stop do |f| %>
+          <% if stop.approval_status == "rejected" %>
+            <p><strong>Pode corrigir a quantidade e enviar um novo pedido.</strong></p>
+          <% end %>
           <p><%= f.label :requested_quantity, "Quantos pães precisa?", for: "quantity_#{stop.id}" %><%= f.number_field :requested_quantity, min: 0, max: 100000, step: 1, required: true, inputmode: "numeric", id: "quantity_#{stop.id}" %></p>
           <p>Se não precisar de pão neste dia, indique 0.</p>
-          <%= f.submit "Enviar pedido", class: "btn btn-primary" %>
+          <%= f.submit stop.approval_status == "rejected" ? "Enviar novo pedido" : "Enviar pedido", class: "btn btn-primary" %>
         <% end %>
       <% else %><p>O pedido está fechado. Para alterações, contacte o administrador.</p><% end %>
     </article>

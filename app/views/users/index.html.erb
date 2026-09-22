@@ -15,7 +15,7 @@
     <% @users.each do |user| %>
       <tr>
         <td><%= user.email %></td>
-        <td><%= role_name(user.role) %></td>
+        <td><span class="role-pill role-<%= user.role %>"><%= role_name(user.role) %></span></td>
         <td>
           <div class="table-actions">
             <%= link_to "Editar", edit_user_path(user), class: "btn btn-small" %>

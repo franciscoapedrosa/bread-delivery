@@ -1,6 +1,8 @@
 <%= render "shared/error_messages", object: @customer, title: "Não foi possível guardar o cliente:" %>
 
 <%= form_with(model: @customer, local: true) do |form| %>
+  <%= hidden_field_tag :origin, @edit_origin if @edit_origin.present? %>
+  <%= hidden_field_tag :route_id, @edit_route.id if @edit_route.present? %>
   <p>
     <%= form.label :name, "Nome" %><br>
     <%= form.text_field :name %>

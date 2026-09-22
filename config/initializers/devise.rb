@@ -9,6 +9,12 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
+  config.paranoid = true
+  config.lock_strategy = :failed_attempts
+  config.unlock_strategy = :time
+  config.maximum_attempts = 5
+  config.unlock_in = 15.minutes
+  config.last_attempt_warning = false
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
   # confirmation, reset password and unlock tokens in the database.

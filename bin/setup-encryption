@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# Generates an encrypted credential artifact, without printing any key material.
+require_relative "../config/boot"
+require "active_support"
+require "active_support/encrypted_file"
+require "securerandom"
+require "yaml"
+
+root = File.expand_path("..", __dir__)
+path = File.join(root, "config/data_encryption.yml.enc")
+abort "Encryption credentials already exist; refusing to replace keys." if File.exist?(path)
+key_path = File.join(root, "config/master.key")
+abort "Provide RAILS_MASTER_KEY or config/master.key first." unless ENV["RAILS_MASTER_KEY"].to_s != "" || File.exist?(key_path)
+file = ActiveSupport::EncryptedFile.new(content_path: path, key_path: key_path, env_key: "RAILS_MASTER_KEY", raise_if_missing_key: true)
+file.write(%w[primary_key deterministic_key key_derivation_salt].to_h { |name| [name, SecureRandom.hex(32)] }.to_yaml)
+puts "Encrypted credentials created. Back up config/data_encryption.yml.enc and the master key separately."

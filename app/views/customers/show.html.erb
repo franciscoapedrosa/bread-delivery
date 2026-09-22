@@ -1,33 +1,69 @@
-<h1>Cliente: <%= @customer.name %></h1>
-
-<p>
-  <strong>Morada:</strong>
-  <%= @customer.address %>
-</p>
-
-<p>
-  <strong>Conta:</strong>
-  <%= @customer.user&.email || "Sem conta — associe este cliente em Utilizadores" %>
-</p>
-
-<h2>Rotas deste cliente</h2>
-<% @customer.routes.each do |route| %><p><%= link_to route.name, route %></p><% end %>
-<h2>Próximas entregas e quantidades</h2>
-<div class="planning-grid">
-  <% @customer.scheduled_stops.includes(route_run: :route).joins(:route_run).where(route_runs: { delivery_date: Date.current.. }).order("route_runs.delivery_date").each do |stop| %>
-    <article class="card">
-      <h3><%= delivery_date_label(stop.route_run.delivery_date) %></h3>
-      <p><%= link_to stop.route_run.route.name, stop.route_run %></p>
-      <% if stop.requested_quantity.nil? %>
-        <p>Pedido por submeter</p>
-      <% else %>
-        <p>Pedido: <%= stop.requested_quantity %> · Aprovado: <%= stop.approved_quantity || "Por aprovar" %></p>
-      <% end %>
-      <p><%= approval_name(stop.approval_status) %></p>
-      <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span>
-    </article>
-  <% end %>
+<div class="detail-title-row customer-title-row">
+  <div>
+    <span class="state-pill <%= @customer.active? ? 'state-delivered' : 'state-cancelled' %>"><%= @customer.active? ? "Cliente ativo" : "Cliente inativo" %></span>
+    <h1><%= @customer.name %></h1>
+  </div>
+  <%= link_to "Editar cliente", edit_customer_path(@customer, origin: "customer"), class: "btn btn-secondary btn-small customer-edit-button" %>
 </div>
 
-<%= link_to "Editar", edit_customer_path(@customer), class: "btn btn-primary" %>
-<%= link_to "Voltar", customers_path, class: "btn" %>
+<section class="detail-card" aria-labelledby="customer-information">
+  <h2 id="customer-information">Informações do cliente</h2>
+  <dl class="detail-list">
+    <div><dt>Morada</dt><dd><%= @customer.address %></dd></div>
+    <div>
+      <dt>Conta de acesso</dt>
+      <dd>
+        <% if @customer.user %>
+          <%= @customer.user.email %>
+        <% else %>
+          <span class="customer-account-row">
+            <span>Ainda não tem conta associada</span>
+            <%= link_to "Criar", new_user_path(customer_id: @customer.id), class: "btn btn-small btn-secondary customer-account-create" %>
+          </span>
+        <% end %>
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section class="detail-section">
+  <h2>Rotas atribuídas</h2>
+  <% if @routes.any? %>
+    <div class="simple-link-list">
+      <% @routes.each do |route| %>
+        <%= link_to route_path(route), class: "simple-link-card" do %>
+          <span>🗺️</span><strong><%= route.name %></strong><span aria-hidden="true">Ver rota →</span>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="empty-note">Este cliente ainda não pertence a nenhuma rota.</p>
+  <% end %>
+</section>
+
+<section class="detail-section">
+  <h2>Próximas entregas</h2>
+  <% if @upcoming_stops.any? %>
+    <div class="planning-grid">
+      <% @upcoming_stops.each do |stop| %>
+        <article class="card">
+          <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span>
+          <h3><%= delivery_date_label(stop.route_run.delivery_date) %></h3>
+          <p><strong>Rota:</strong> <%= link_to stop.route_run.route.name, stop.route_run %></p>
+          <p><strong><%= bread_quantity_summary(stop) %></strong></p>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="empty-note">Não existem entregas futuras marcadas.</p>
+  <% end %>
+</section>
+
+<div class="plan-actions customer-detail-actions">
+  <% if @customer.active? %>
+    <%= button_to "Desativar cliente", deactivate_customer_path(@customer), method: :patch, class: "btn btn-danger", data: { turbo_confirm: "Desativar #{@customer.name}?" } %>
+  <% else %>
+    <%= button_to "Reativar cliente", activate_customer_path(@customer), method: :patch, class: "btn" %>
+    <%= button_to "Eliminar cliente", customer_path(@customer), method: :delete, class: "btn btn-delete-customer", data: { turbo_confirm: "Eliminar definitivamente #{@customer.name}? Esta ação não pode ser desfeita. Clientes com pedidos ou entregas agendadas não podem ser eliminados." } %>
+  <% end %>
+</div>

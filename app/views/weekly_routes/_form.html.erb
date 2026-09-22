@@ -1,0 +1,11 @@
+<p>Esta rota repete-se todas as semanas nos dias escolhidos. Os clientes pedem a quantidade para cada entrega.</p>
+<%= render "shared/error_messages", object: @schedule, title: "Verifique os dados:" %>
+<%= form_with model: @schedule, class: "card" do |f| %>
+  <p><%= f.label :route_id, "Rota" %><%= f.collection_select :route_id, Route.order(:name), :id, :name, { prompt: "Escolha a rota" }, required: true, disabled: @schedule.persisted? %></p>
+  <p><%= f.label :days, "Dias de entrega" %><%= f.select :days, WeeklyRoute::OPTIONS %></p>
+  <p><%= f.label :starts_on, "A partir de" %><%= f.date_field :starts_on, required: true %></p>
+<p><%= f.label :distributor_id, "Distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor").sort_by(&:email), :id, :email, { prompt: "Escolha o distribuidor" }, required: true %></p>
+  <p><%= f.label :position, "Ordem da rota no dia" %><%= f.number_field :position, min: 1, required: true %></p>
+  <p>Alterações preservam as entregas de hoje e os pedidos já submetidos. Pode editar essas entregas individualmente no percurso.</p>
+  <%= f.submit "Guardar agenda", class: "btn btn-primary" %>
+<% end %>

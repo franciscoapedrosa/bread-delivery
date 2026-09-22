@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "dotenv"
+require "uri"
+
+EXPECTED_HOST = "ep-silent-butterfly-za3t0sy6.c-2.eu-west-2.aws.neon.tech"
+url = Dotenv.parse(File.expand_path("../.env.security-staging", __dir__)).fetch("STAGING_DATABASE_URL", "").strip
+uri = URI.parse(url)
+abort "Destino incorreto; migração recusada" unless uri.host == EXPECTED_HOST && uri.path == "/neondb" && uri.user == "neondb_owner"
+
+ENV["RAILS_ENV"] = "production"
+ENV["DATABASE_URL"] = url
+ENV["DATABASE_APP_ROLE"] = "bread_app"
+ENV.delete("ENCRYPTION_MIGRATION")
+
+exec(File.expand_path("rails", __dir__), "db:migrate")

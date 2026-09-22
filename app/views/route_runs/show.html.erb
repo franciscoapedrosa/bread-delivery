@@ -1,19 +1,23 @@
-<%= link_to "Voltar à semana", route_runs_path(week: @run.delivery_date), class: "btn" %>
-<h1><%= @run.route.name %></h1>
+<header class="route-run-title-row">
+  <h1><%= @run.route.name %></h1>
+  <% if current_user.admin? %>
+    <details class="route-run-editor">
+      <summary class="route-edit-link">Editar</summary>
+      <div class="card route-run-edit-panel">
+        <h2>Editar rota deste dia</h2>
+        <%= form_with model: @run do |f| %>
+          <p><%= f.label :distributor_id, "Distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor"), :id, :email %></p>
+          <p><%= f.label :position, "Ordem da rota neste dia" %><%= f.number_field :position, min: 1, required: true %></p>
+          <%= f.submit "Guardar", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    </details>
+  <% end %>
+</header>
 <p><%= delivery_date_label(@run.delivery_date) %> · Rota <%= @run.position %> do dia</p>
 <p>Distribuidor: <%= @run.distributor.email %></p>
 <p class="bread-total"><%= @run.total_bread %> pães aprovados</p>
 <%= render "shared/error_messages", object: @run, title: "Verifique os dados:" %>
-<% if current_user.admin? %>
-  <details class="card">
-    <summary>Alterar distribuidor ou ordem da rota</summary>
-    <%= form_with model: @run do |f| %>
-      <p><%= f.label :distributor_id, "Distribuidor" %><%= f.collection_select :distributor_id, User.where(role: "distributor"), :id, :email %></p>
-      <p><%= f.label :position, "Ordem da rota neste dia" %><%= f.number_field :position, min: 1, required: true %></p>
-      <%= f.submit "Guardar", class: "btn btn-primary" %>
-    <% end %>
-  </details>
-<% end %>
 <h2>Percurso de entrega</h2>
 <ol class="journey">
   <% @stops.each_with_index do |stop, index| %>
@@ -23,9 +27,19 @@
         <span class="state-pill state-<%= stop.status %>"><%= delivery_status(stop.status) %></span>
         <h3><%= stop.customer.name %></h3>
         <p><%= stop.address %></p>
-        <p><strong><%= stop.approved_quantity.nil? ? approval_name(stop.approval_status) : "#{stop.approved_quantity} pães · #{approval_name(stop.approval_status)}" %></strong></p>
+        <% bread_state = stop.status == "cancelled" || stop.approval_status == "rejected" ? "negative" : stop.approval_status == "approved" ? "approved" : "waiting" %>
+        <p class="journey-bread-summary">
+          <span class="bread-state-icon bread-state-<%= bread_state %>" aria-hidden="true"><%= { "approved" => "✓", "waiting" => "⚠", "negative" => "×" }.fetch(bread_state) %></span>
+          <strong>
+            <% if stop.status == "cancelled" %>
+              <%= stop.approved_quantity || stop.requested_quantity %><%= stop.approved_quantity || stop.requested_quantity ? " pães — entrega cancelada" : "Entrega cancelada" %>
+            <% else %>
+              <%= bread_quantity_summary(stop) %>
+            <% end %>
+          </strong>
+        </p>
         <details class="directions">
-          <summary class="btn">Obter direções</summary>
+          <summary class="btn <%= 'btn-directions' if current_user.distributor? %>"><% if current_user.distributor? %><span aria-hidden="true">📍</span> <% end %>Obter direções</summary>
           <% address = ERB::Util.url_encode(stop.address) %>
           <div class="plan-actions">
             <%= link_to "Google Maps", "https://www.google.com/maps/dir/?api=1&destination=#{address}&travelmode=driving", target: "_blank", rel: "noopener", class: "btn" %>

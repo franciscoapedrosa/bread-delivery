@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+require "bundler/setup"
+require "dotenv"
+require "uri"
+
+url = Dotenv.parse(File.expand_path("../.env.security-staging-runtime", __dir__)).fetch("STAGING_RUNTIME_DATABASE_URL")
+uri = URI.parse(url)
+abort "Destino inválido" unless uri.host == "ep-silent-butterfly-za3t0sy6.c-2.eu-west-2.aws.neon.tech" && uri.path == "/neondb" && uri.user == "bread_app"
+ENV["RAILS_ENV"] = "production"
+ENV["DATABASE_URL"] = url
+ENV.delete("ENCRYPTION_MIGRATION")
+require_relative "../config/environment"
+Rails.logger = ActiveSupport::Logger.new(File::NULL)
+ActiveRecord::Base.logger = Rails.logger
+ActionMailer::Base.delivery_method = :test
+ActionMailer::Base.perform_deliveries = false
+
+def check(condition, label)
+  raise "Falhou: #{label}" unless condition
+  puts "OK: #{label}"
+end
+
+connection = ActiveRecord::Base.connection
+check(connection.raw_connection.ssl_in_use?, "TLS ativo na ligação ao Neon")
+DatabaseAccess.verify_runtime_role!
+puts "OK: conta restrita e RLS nas 10 tabelas"
+check(User.count.zero? && Customer.count.zero? && Route.count.zero?, "sem contexto não há acesso a dados")
+DatabaseAccess.with_context(role: "system") do
+  [ [ User, %w[email] ], [ Customer, %w[name address] ], [ ScheduledStop, %w[address rejection_reason] ] ].each do |model, attributes|
+    count = 0
+    model.find_each do |record|
+      attributes.each do |attribute|
+        raw = record.read_attribute_before_type_cast(attribute)
+        next if raw.nil?
+        raise "Campo não encriptado: #{model.name}.#{attribute}" unless ActiveRecord::Encryption.encryptor.encrypted?(raw)
+        record.public_send(attribute)
+        count += 1
+      end
+    end
+    puts "OK: #{model.name}: #{count} campos encriptados e decifrados"
+  end
+  check(User.all.all? { |user| user.encrypted_password.start_with?("$2") }, "palavras-passe com hash bcrypt")
+end
+check(User.count.zero? && Customer.count.zero?, "contexto restaurado após leitura")
+session = ActionDispatch::Integration::Session.new(Rails.application)
+session.host! "bread-delivery-6lfk.onrender.com"
+session.https!
+session.get "/users/sign_in"
+check(session.response.status == 200, "formulário de login em produção")
+session.get "/customers", headers: { "Accept" => "application/json" }
+check(session.response.status == 401, "acesso JSON anónimo recusado")
+puts "Validação terminada; sem alterações aos registos."

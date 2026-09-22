@@ -1,6 +1,7 @@
 class RoutesController < ApplicationController
-  before_action :set_route, only: %i[show edit update destroy]
   before_action :require_admin!, except: :index
+  before_action :set_route, only: %i[show edit update destroy]
+  before_action :set_edit_origin, only: %i[edit update]
 
   def index
     unless current_user.admin?
@@ -56,6 +57,11 @@ class RoutesController < ApplicationController
   end
 
   private
+
+  def set_edit_origin
+    @edit_origin = params[:origin] == "list" ? "list" : "route"
+    @edit_back_path = @edit_origin == "list" ? routes_path : route_path(@route)
+  end
 
   def set_route
     @route = Route.find(params[:id])

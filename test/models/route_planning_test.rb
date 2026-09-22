@@ -2,12 +2,15 @@ require "test_helper"
 
 class RoutePlanningTest < ActiveSupport::TestCase
   setup do
+    travel_to Time.zone.local(2026, 9, 16, 12)
     @route = routes(:one)
     @route.route_stops.create!(customer: customers(:one), position: 2)
     @route.route_stops.create!(customer: customers(:two), position: 1)
-    @run = RouteRun.create!(route: @route, distributor: users(:distributor), delivery_date: Date.current + 2, position: 1)
+    @run = RouteRun.create!(route: @route, distributor: users(:distributor), delivery_date: Date.tomorrow, position: 1)
     @stop = @run.scheduled_stops.find_by!(customer: customers(:one))
   end
+
+  teardown { travel_back }
 
   test "planning snapshots customer order and address" do
     assert_equal [ customers(:two).id, customers(:one).id ], @run.scheduled_stops.ordered.pluck(:customer_id)
@@ -35,11 +38,39 @@ class RoutePlanningTest < ActiveSupport::TestCase
     assert_equal 4, @stop.reload.requested_quantity
   end
 
+  test "rejected requests can be resubmitted before but not at the deadline" do
+    assert @stop.request_bread(10)
+    assert @stop.decide!("rejected", rejection_reason: "Reduza a quantidade.")
+    travel_to(@run.cutoff - 1.second) do
+      assert @stop.open_for_request?
+      assert @stop.request_bread(5)
+      assert_equal "pending", @stop.reload.approval_status
+      assert_nil @stop.rejection_reason
+    end
+    assert @stop.decide!("rejected", rejection_reason: "Quantidade indisponível.")
+    travel_to(@run.cutoff) do
+      assert_not @stop.open_for_request?
+      assert_not @stop.request_bread(3)
+      assert_equal "rejected", @stop.reload.approval_status
+      assert_equal 5, @stop.requested_quantity
+    end
+  end
+
   test "approval cannot accept a different quantity from the one the admin saw" do
     assert @stop.request_bread(12)
     assert_not @stop.decide!("approved", expected_quantity: 5)
     assert_nil @stop.reload.approved_quantity
     assert_equal "pending", @stop.approval_status
+  end
+
+  test "rejection requires a reason and a new request clears it" do
+    assert @stop.request_bread(12)
+    assert_not @stop.decide!("rejected", rejection_reason: "")
+    assert_equal "pending", @stop.reload.approval_status
+    assert @stop.decide!("rejected", rejection_reason: "Quantidade fora do combinado")
+    assert_equal "Quantidade fora do combinado", @stop.reload.rejection_reason
+    assert @stop.request_bread(8)
+    assert_nil @stop.reload.rejection_reason
   end
 
   test "cutoff remains 23 on Lisbon daylight saving change" do

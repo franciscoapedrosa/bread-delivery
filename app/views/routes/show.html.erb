@@ -1,26 +1,29 @@
 <div class="route-title-row">
   <h1><%= @route.name %></h1>
-  <%= link_to "Alterar nome", edit_route_path(@route), class: "route-rename-link" %>
-</div>
-<div class="plan-actions">
-  <%= link_to "Marcar dia de entrega", new_route_run_path(route_id: @route.id), class: "btn btn-primary" %>
+  <%= link_to "Alterar nome", edit_route_path(@route, origin: "route"), class: "route-rename-link" %>
 </div>
 <h2>Percurso · ordem dos clientes</h2>
-<p>A ordem mais baixa é a primeira entrega. Estas alterações aplicam-se às próximas marcações; pode ajustar os percursos já marcados em Entregas.</p>
+<p>Use as setas para subir ou descer cada cliente. A ordem é guardada automaticamente e aplica-se às próximas marcações. Os percursos já marcados podem ser ajustados na Agenda semanal.</p>
+<% stops = @route.route_stops.includes(:customer).ordered.to_a %>
 <ol class="journey">
-  <% @route.route_stops.includes(:customer).ordered.each_with_index do |stop, index| %>
-    <li class="journey-stop card">
+  <% stops.each_with_index do |stop, index| %>
+    <li class="journey-stop card reorderable-stop" id="route-stop-<%= stop.id %>">
       <span class="step-number"><%= index + 1 %></span>
       <div class="stop-body">
         <h3><%= stop.customer.name %> <%= "(inativo)" unless stop.customer.active? %></h3>
         <p><%= stop.customer.address %></p>
-        <%= link_to "Editar morada do cliente", edit_customer_path(stop.customer), class: "btn" %>
-        <%= form_with model: [@route, stop], class: "plan-actions" do |f| %>
-          <%= f.label :position, "Ordem", for: "route_stop_#{stop.id}_position" %>
-          <%= f.number_field :position, min: 1, required: true, id: "route_stop_#{stop.id}_position", class: "order-input" %>
-          <%= f.submit "Guardar ordem", class: "btn" %>
+        <%= link_to edit_customer_path(stop.customer, origin: "route", route_id: @route.id), class: "btn btn-directions" do %>
+          <span aria-hidden="true">📍</span> Editar morada do cliente
         <% end %>
-        <%= button_to "Retirar da rota", route_route_stop_path(@route, stop), method: :delete, class: "btn btn-danger", data: { turbo_confirm: "Retirar este cliente das próximas marcações desta rota?" } %>
+        <div class="route-order-actions">
+          <%= button_to route_route_stop_path(@route, stop), method: :patch, params: { direction: "up" }, class: "btn btn-secondary", disabled: index.zero?, title: "Subir", aria: { label: "Subir #{stop.customer.name}" } do %>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
+          <% end %>
+          <%= button_to route_route_stop_path(@route, stop), method: :patch, params: { direction: "down" }, class: "btn btn-secondary", disabled: index == stops.length - 1, title: "Descer", aria: { label: "Descer #{stop.customer.name}" } do %>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          <% end %>
+        </div>
+        <%= button_to "Retirar da rota", route_route_stop_path(@route, stop), method: :delete, class: "btn btn-danger", form_class: "route-stop-remove", data: { turbo_confirm: "Retirar este cliente das próximas marcações desta rota?" } %>
       </div>
     </li>
   <% end %>
@@ -28,7 +31,7 @@
 <section class="card">
   <h2>Adicionar cliente</h2>
   <%= form_with model: [@route, RouteStop.new(position: (@route.route_stops.maximum(:position) || 0) + 1)] do |f| %>
-    <p><%= f.label :customer_id, "Cliente" %><%= f.collection_select :customer_id, Customer.active.where.not(id: @route.route_stops.select(:customer_id)).order(:name), :id, :name, { prompt: "Escolha um cliente" }, required: true %></p>
+<p><%= f.label :customer_id, "Cliente" %><%= f.collection_select :customer_id, Customer.active.where.not(id: @route.route_stops.select(:customer_id)).sort_by(&:name), :id, :name, { prompt: "Escolha um cliente" }, required: true %></p>
     <p><%= f.label :position, "Ordem de entrega" %><%= f.number_field :position, min: 1, required: true %></p>
     <%= f.submit "Adicionar à rota", class: "btn btn-primary" %>
   <% end %>

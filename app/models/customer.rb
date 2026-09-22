@@ -1,4 +1,6 @@
 class Customer < ApplicationRecord
+  # Equality queries and the existing unique index require deterministic encryption.
+  encrypts :name, :address, deterministic: true
   has_many :deliveries, dependent: :destroy
   belongs_to :user, optional: true
   has_many :route_stops, dependent: :destroy

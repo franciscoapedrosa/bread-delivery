@@ -2,10 +2,13 @@ require "test_helper"
 
 class VehiclesAndBakeryTest < ActionDispatch::IntegrationTest
   setup do
+    travel_to Time.zone.local(2026, 9, 16, 12)
     @baker = User.create!(email: "baker@example.com", password: "password123", role: "baker")
     @vehicle = Vehicle.create!(name: "Carrinha branca", registration: "AA-00-BB", distributor: users(:distributor))
     @other_vehicle = Vehicle.create!(name: "Carrinha azul", registration: "CC-00-DD", distributor: users(:other_distributor))
   end
+
+  teardown { travel_back }
 
   test "admin creates vehicle with photo and distributor sees it" do
     sign_in users(:admin)
@@ -62,6 +65,8 @@ class VehiclesAndBakeryTest < ActionDispatch::IntegrationTest
     get bakery_path
     assert_response :success
     assert_select ".production-highlight .bread-total", "7 pães"
+    assert_select ".production-highlight .production-customers li", text: "7 pães — #{customers(:one).name}"
+    assert_select ".production-highlight .production-customers li", count: 1
     assert_select ".state-pending", text: /1 pedidos/
     second.decide!("approved")
     second.update!(status: "cancelled")

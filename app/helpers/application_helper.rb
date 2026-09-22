@@ -32,6 +32,25 @@ module ApplicationHelper
   end
 
   def delivery_date_label(date)
-    "#{day_name(date.strftime('%A').downcase)}, #{date.strftime('%d/%m/%Y')}"
+    label = "#{day_name(date.strftime('%A').downcase)}, #{date.strftime('%d/%m/%Y')}"
+    [ relative_delivery_day(date), label ].compact.join(" · ")
+  end
+
+  def relative_delivery_day(date)
+    return "Hoje" if date == Date.current
+    "Amanhã" if date == Date.current + 1
+  end
+
+  def bread_quantity_summary(stop)
+    case stop.approval_status
+    when "approved"
+      "#{stop.approved_quantity} pães aprovados"
+    when "pending"
+      "#{stop.requested_quantity} pães — por aprovar"
+    when "rejected"
+      "Quantidade de pão por pedir (pedido anterior recusado)"
+    else
+      "Quantidade de pão por pedir"
+    end
   end
 end

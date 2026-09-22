@@ -1,10 +1,11 @@
 class User < ApplicationRecord
+  encrypts :email, deterministic: true, downcase: true
   ROLES = %w[admin distributor customer baker].freeze
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable, :lockable
 
   has_many :deliveries, foreign_key: :distributor_id, inverse_of: :distributor, dependent: :destroy
   has_many :route_runs, foreign_key: :distributor_id, dependent: :restrict_with_error
@@ -36,6 +37,8 @@ class User < ApplicationRecord
   private
 
   def customer_profile_required
+    return if persisted? && !will_save_change_to_role?
+
     errors.add(:base, "Preencha o nome e a morada do cliente.") if customer? && customer.nil?
   end
 

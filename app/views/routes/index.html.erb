@@ -12,11 +12,11 @@
     <tbody>
       <% @routes.each do |route| %>
         <tr>
-          <td><%= link_to route.name, route %></td>
+          <td><strong><%= route.name %></strong></td>
           <td>
             <div class="table-actions">
-              <%= link_to "Clientes e percurso", route, class: "btn btn-small btn-primary" %>
-              <%= link_to "Editar", edit_route_path(route), class: "btn btn-small" %>
+              <%= link_to "Clientes e percurso", route, class: "btn btn-small btn-secondary" %>
+              <%= link_to "Editar", edit_route_path(route, origin: "list"), class: "btn btn-small" %>
               <%= button_to "Eliminar", route_path(route), method: :delete, class: "btn btn-small btn-danger", form_class: "inline-form", data: { turbo_confirm: "Tem a certeza?" } %>
             </div>
           </td>
